@@ -8,22 +8,28 @@ import java.util.Objects;
 
 public abstract class Protocol {
 
-	private String version;
-	private String senderID;
+	protected String version;
+	protected String senderID;
+	protected File file;
+	final protected int chunkSize = 64000;
 
 	public enum MessageType {
 		PUTCHUNK, STORED, GETCHUNK, CHUNK, DELETE, REMOVED
 	};
 
 	public byte[] createHeader(MessageType type, String fileID, int chunkNo, int replicationDeg) {
+		String firstPart = type.name() + " " + this.version + " " + this.senderID + " ";
 		String res = new String();
-		if (replicationDeg == -1) {
-			if (chunkNo == -1)
-				res = type.name() + " " + this.version + " " + this.senderID + " " + fileID;
+		if (chunkNo == -1) {
+			res = firstPart + fileID;
+		} else {
+			String secondPart = new String();
+			if (replicationDeg == -1)
+				secondPart = " " + chunkNo;
 			else
-				res = type.name() + " " + this.version + " " + this.senderID + " " + fileID + " " + chunkNo;
-		} else
-			res = type.name() + " " + this.version + " " + this.senderID + " " + fileID + " " + chunkNo + " " + replicationDeg;
+				secondPart = " " + chunkNo + " " + replicationDeg;
+			res = firstPart + fileID + secondPart;
+		}
 		return res.getBytes();
 	}
 
@@ -32,7 +38,12 @@ public abstract class Protocol {
 		String size = Objects.toString(file.length());
 		String last = Files.getLastModifiedTime(file.toPath(), LinkOption.NOFOLLOW_LINKS).toString();
 		String owner = Files.getOwner(file.toPath(), LinkOption.NOFOLLOW_LINKS).toString();
-		String res = name + "::" + size + "::" + last + "::" + owner;
+		String temp = name + "::" + size + "::" + last + "::" + owner;
+		
+		
+		
+		//TODO encode e mandar sequencia de bytes para UTF-8
+		String res = null;
 		return res;
 	}
 
