@@ -20,23 +20,36 @@ public abstract class Protocol {
 	public enum MessageType {
 		PUTCHUNK, STORED, GETCHUNK, CHUNK, DELETE, REMOVED
 	};
-
+	
+	/**
+	 * @brief Creates a message header.
+	 * @param type
+	 * @param fileID
+	 * @param chunkNo
+	 * @param replicationDeg
+	 * @return
+	 */
 	public byte[] createHeader(MessageType type, String fileID, int chunkNo, int replicationDeg) {
-		String firstPart = type.name() + " " + this.version + " " + this.senderID + " ";
-		String res = new String();
-		if (chunkNo == -1) {
-			res = firstPart + fileID;
-		} else {
+		//header has at least type, version, sender and file id
+		String res = type.name() + " " + this.version + " " + this.senderID + " " + fileID;
+		if (chunkNo != -1) {
 			String secondPart = new String();
 			if (replicationDeg == -1)
 				secondPart = " " + chunkNo;
 			else
 				secondPart = " " + chunkNo + " " + replicationDeg;
-			res = firstPart + fileID + secondPart;
+			res = res + secondPart;
 		}
 		return res.getBytes();
 	}
 
+	/**
+	 * @brief Acquires a file's metadata, in order to create the fileID parameter for the header.
+	 * @param file
+	 * @return
+	 * @throws IOException
+	 * @throws NoSuchAlgorithmException
+	 */
 	public String getFileData(File file) throws IOException, NoSuchAlgorithmException {
 		String name = file.getName();
 		String size = Objects.toString(file.length());
@@ -47,9 +60,14 @@ public abstract class Protocol {
 		MessageDigest digest = MessageDigest.getInstance("SHA-256");
 		byte[] initialData = digest.digest(temp.getBytes(StandardCharsets.UTF_8));
 		String hashedData = encodeByteArray(initialData);
-		return new String(hashedData);		
+		return hashedData;		
 	}
-
+	
+	/**
+	 * @brief Encodes a byte array to a String representation of their hexadecimal representations.
+	 * @param data
+	 * @return
+	 */
 	private String encodeByteArray(byte[] data) {
 		StringBuilder sb = new StringBuilder();
 		for (byte b: data) {
@@ -58,6 +76,11 @@ public abstract class Protocol {
 		return sb.toString();
 	}
 
+	/**
+	 * @brief Protocol constructor.
+	 * @param version
+	 * @param senderID
+	 */
 	public Protocol(String version, String senderID) {
 		this.version = version;
 		this.senderID = senderID;
