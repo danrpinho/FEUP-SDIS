@@ -3,6 +3,7 @@ package sdis1718_t2g02;
 import java.io.File;
 import java.io.IOException;
 import java.net.MulticastSocket;
+import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.net.DatagramPacket;
 import java.io.FileInputStream;
@@ -27,7 +28,7 @@ public class BackupProtocol extends Protocol {
 			this.chunkCount++;
 	}
 
-	private boolean backup(MulticastSocket socket) throws IOException {
+	private boolean backup(MulticastSocket socket) throws IOException, NoSuchAlgorithmException {
 		String fileID = super.getFileData(file);
 		FileInputStream stream = new FileInputStream(this.file);	
 		
