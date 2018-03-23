@@ -3,6 +3,7 @@ package sdis1718_t2g02;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.MulticastSocket;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
@@ -29,7 +30,7 @@ public class BackupProtocol extends Protocol {
 			this.chunkCount++;
 	}
 
-	private boolean backup(MulticastSocket socket) throws IOException, NoSuchAlgorithmException {
+	private boolean backup(MulticastSocket mdbSocket) throws IOException, NoSuchAlgorithmException {
 		String fileID = super.getFileData(file);
 		FileInputStream stream = new FileInputStream(this.file);	
 		
@@ -47,13 +48,24 @@ public class BackupProtocol extends Protocol {
 			outputStream.close();
 
 			DatagramPacket packet = new DatagramPacket(message, message.length);
-			socket.send(packet);
+			mdbSocket.send(packet);
 		}
 		return false;
+		
+		//TODO finish backup and add listening for STORED messages
 	}
 
-	private boolean store() {
+	private boolean store(DatagramPacket packet, MulticastSocket mcSocket) throws UnsupportedEncodingException {
+		String packetString = new String(packet.getData(), "UTF-8");
+		String[] packetData = packetString.split(this.endHeader);
+		byte[] chunk = packetData[1].getBytes();		
 		// TODO implementar store
+		// TODO guardar packet
+		
+		
+		
+		// TODO mandar para o MC o stored
+		// TODO
 		return false;
 	}
 

@@ -22,7 +22,7 @@ public class Peer {
 		
 		public static void main(String[] args) throws IOException {
 			if(args.length != 9) {
-				System.out.println("Usage: java Server <Protocol_Version> <Server_ID> <Service_Access_Point> <MC_IP_Multicast_Address> <MC_Port> <MDB_IP_Multicast_Address> <MDB_Port> <MDR_IP_Multicast_Address> <MRD_Port>");
+				System.out.println("Usage: java Peer <Protocol_Version> <Server_ID> <Service_Access_Point> <MC_IP_Multicast_Address> <MC_Port> <MDB_IP_Multicast_Address> <MDB_Port> <MDR_IP_Multicast_Address> <MRD_Port>");
 				return;
 			}
 			

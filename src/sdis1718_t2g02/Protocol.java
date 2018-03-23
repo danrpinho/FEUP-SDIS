@@ -16,6 +16,9 @@ public abstract class Protocol {
 	protected String senderID;
 	protected File file;
 	final protected int chunkSize = 64000;
+	public final char CR  = (char) 0x0D;
+	public final char LF  = (char) 0x0A; 
+	public final String endHeader = "" + this.CR + this.LF + this.CR + this.LF;
 
 	public enum MessageType {
 		PUTCHUNK, STORED, GETCHUNK, CHUNK, DELETE, REMOVED
@@ -38,7 +41,7 @@ public abstract class Protocol {
 				secondPart = " " + chunkNo;
 			else
 				secondPart = " " + chunkNo + " " + replicationDeg;
-			res = res + secondPart;
+			res = res + secondPart + this.endHeader;
 		}
 		return res.getBytes();
 	}
