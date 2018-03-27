@@ -3,10 +3,11 @@ package sdis1718_t2g02;
 import java.io.*;
 import java.net.*;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class Peer {
-	
+		
 		protected static String version = null;
 		protected static int peerID;
 		protected static String accessPoint = null;
@@ -19,6 +20,11 @@ public class Peer {
 		protected static MulticastSocket MC_socket = null;
 		protected static MulticastSocket MDB_socket = null;
 		protected static MulticastSocket MDR_socket = null;
+		protected static ConcurrentHashMap<String, StoreRecord> fileStores = new ConcurrentHashMap<String, StoreRecord>();
+		
+		public Peer getInstance() {
+			return this;
+		}
 		
 		public static void main(String[] args) throws IOException {
 			if(args.length != 9) {
@@ -30,24 +36,56 @@ public class Peer {
 				version = args[0];
 				peerID = Integer.parseInt(args[1]);
 				accessPoint = args[2];
-				openMC(args[3], args[4]);
-				openMDB(args[5], args[6]);
-				openMDR(args[7], args[8]);
-				Thread threadMC =  new Thread() {
-					
-				};
-				
-				
-				
-				
-				
-				
-				
-				
-				
+				runThreads(args[3], args[4],args[5],args[6],args[7],args[8]);
+				//TODO lidar com o cliente
 			}
 		}
 		
+		private static void runThreads(String addressMC, String portMC, String addressMDR, String portMDR, String addressMDB, String portMDB) {
+			Thread threadMC =  new Thread(new Runnable() {
+				public void run() {
+					try {
+						openMC(addressMC, portMC);
+						runMC();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}}});
+			
+			Thread threadMDR =  new Thread(new Runnable() {
+				public void run() {
+					try {
+						openMDB(addressMDR, portMDR);
+						runMDR();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}}});
+			
+			Thread threadMDB =  new Thread(new Runnable() {
+				public void run() {
+					try {
+						openMDR(addressMDB, portMDB);
+						runMDB();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}}});
+			
+			threadMC.run();
+			threadMDR.run();							
+			threadMDB.run();
+		}
+		
+		protected static void runMC() {
+			// TODO loop de execucao do MC
+		}		
+
+		protected static void runMDR() {
+			// TODO loop de execucao do MDR
+		}
+
+		protected static void runMDB() {
+			// TODO loop de execucao do MDB
+		}
+
 		public static void close() throws IOException {
 			MC_socket.leaveGroup(MC_address);
 			MC_socket.close();
@@ -79,5 +117,4 @@ public class Peer {
 			MDB_socket = new MulticastSocket(MDB_port);
 			MDB_socket.joinGroup(MDB_address);
 		}
-		
 }

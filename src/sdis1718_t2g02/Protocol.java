@@ -14,6 +14,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Objects;
+import java.lang.Thread;
 
 import sdis1718_t2g02.Protocol.MessageType;
 
@@ -118,7 +119,7 @@ public abstract class Protocol {
 		
 	}
 	
-	private boolean backup(MulticastSocket mdbSocket) throws IOException, NoSuchAlgorithmException {
+	private boolean backup(MulticastSocket mdbSocket) throws IOException, NoSuchAlgorithmException, InterruptedException {
 		String fileID = getFileData(file);
 		FileInputStream stream = new FileInputStream(this.file);	
 		
@@ -139,6 +140,8 @@ public abstract class Protocol {
 
 				DatagramPacket packet = new DatagramPacket(message, message.length);
 				mdbSocket.send(packet);
+				long timeout = (long) (1000 * Math.pow(2, resendCounter));
+				Thread.sleep(timeout);
 				resendCounter++;
 			}
 		}
