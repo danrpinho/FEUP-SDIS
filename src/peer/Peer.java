@@ -1,4 +1,4 @@
-package sdis1718_t2g02;
+package peer;
 
 import java.io.*;
 import java.net.*;

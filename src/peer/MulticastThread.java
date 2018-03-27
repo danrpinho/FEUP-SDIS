@@ -1,6 +1,7 @@
-package sdis1718_t2g02;
+package peer;
 
 import java.io.IOException;
+import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.net.UnknownHostException;
@@ -54,6 +55,13 @@ public abstract class MulticastThread implements Runnable {
 	protected String getFirstWord(String data) {
 		String[] stringArray = data.split(" ");
 		return stringArray[0];
+	}
+	
+	protected DatagramPacket receivePacket(int bufferSize) throws IOException {
+		byte[] rbuf = new byte[bufferSize];
+		DatagramPacket packet = new DatagramPacket(rbuf, rbuf.length);
+		socket.receive(packet);
+		return packet;
 	}
 
 }

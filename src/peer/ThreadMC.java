@@ -1,4 +1,4 @@
-package sdis1718_t2g02;
+package peer;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -16,10 +16,7 @@ public class ThreadMC extends MulticastThread {
 	public void run() {
 		while (true) {
 			try {
-				byte[] rbuf = new byte[512];
-				DatagramPacket packet = new DatagramPacket(rbuf, rbuf.length);
-				socket.receive(packet);
-				
+				DatagramPacket packet = receivePacket(512);				
 				String data = new String(packet.getData(), "UTF-8");
 				String firstWord = getFirstWord(data);
 				switch(firstWord) {

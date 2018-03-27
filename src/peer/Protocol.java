@@ -1,4 +1,4 @@
-package sdis1718_t2g02;
+package peer;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -14,9 +14,10 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Objects;
-import java.lang.Thread;
 
-import sdis1718_t2g02.Protocol.MessageType;
+import peer.Protocol.MessageType;
+
+import java.lang.Thread;
 
 public abstract class Protocol {
 
