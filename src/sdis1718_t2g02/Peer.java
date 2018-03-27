@@ -8,6 +8,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class Peer {
 		
+		protected static Peer instance;
 		protected static String version = null;
 		protected static int peerID;
 		protected static String accessPoint = null;
@@ -22,11 +23,16 @@ public class Peer {
 		protected static MulticastSocket MDR_socket = null;
 		protected static ConcurrentHashMap<String, StoreRecord> fileStores = new ConcurrentHashMap<String, StoreRecord>();
 		
-		public Peer getInstance() {
-			return this;
+		public static Peer getInstance() {
+			if(instance == null) {
+				instance = new Peer();
+			}
+			
+			return instance;
 		}
 		
 		public static void main(String[] args) throws IOException {
+			getInstance();
 			if(args.length != 9) {
 				System.out.println("Usage: java Peer <Protocol_Version> <Server_ID> <Service_Access_Point> <MC_IP_Multicast_Address> <MC_Port> <MDB_IP_Multicast_Address> <MDB_Port> <MDR_IP_Multicast_Address> <MRD_Port>");
 				return;
@@ -116,5 +122,13 @@ public class Peer {
 			MDR_port = Integer.parseInt(port);
 			MDB_socket = new MulticastSocket(MDB_port);
 			MDB_socket.joinGroup(MDB_address);
+		}
+
+		public ConcurrentHashMap<String, StoreRecord> getFileStores(){
+			return fileStores;
+		}
+		
+		public  static void setFileStores(ConcurrentHashMap<String, StoreRecord> hashmap) {
+			fileStores = hashmap;
 		}
 }
