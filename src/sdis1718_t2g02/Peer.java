@@ -30,21 +30,20 @@ public class Peer {
 				version = args[0];
 				peerID = Integer.parseInt(args[1]);
 				accessPoint = args[2];
-				MC_address = InetAddress.getByName(args[3]);
-				MC_port = Integer.parseInt(args[4]);
-				MDB_address = InetAddress.getByName(args[5]);
-				MDB_port = Integer.parseInt(args[6]);
-				MDR_address = InetAddress.getByName(args[7]);
-				MDR_port = Integer.parseInt(args[8]);
+				openMC(args[3], args[4]);
+				openMDB(args[5], args[6]);
+				openMDR(args[7], args[8]);
+				Thread threadMC =  new Thread() {
+					
+				};
 				
-				MC_socket = new MulticastSocket(MC_port);
-				MC_socket.joinGroup(MC_address);
 				
-				MDB_socket = new MulticastSocket(MDB_port);
-				MDB_socket.joinGroup(MDB_address);
 				
-				MDR_socket = new MulticastSocket(MDR_port);
-				MDR_socket.joinGroup(MDR_address);
+				
+				
+				
+				
+				
 				
 			}
 		}
@@ -58,7 +57,27 @@ public class Peer {
 			
 			MDR_socket.leaveGroup(MC_address);
 			MDR_socket.close();
-		}	
+		}
 		
+		public static void openMC(String address, String port) throws IOException {
+			MC_address = InetAddress.getByName(address);
+			MC_port = Integer.parseInt(port);
+			MC_socket = new MulticastSocket(MC_port);
+			MC_socket.joinGroup(MC_address);
+		}
+		
+		public static void openMDR(String address, String port) throws IOException {
+			MDB_address = InetAddress.getByName(address);
+			MDB_port = Integer.parseInt(port);
+			MDR_socket = new MulticastSocket(MDR_port);
+			MDR_socket.joinGroup(MDR_address);
+		}
+		
+		public static void openMDB(String address, String port) throws IOException {
+			MDR_address = InetAddress.getByName(address);
+			MDR_port = Integer.parseInt(port);
+			MDB_socket = new MulticastSocket(MDB_port);
+			MDB_socket.joinGroup(MDB_address);
+		}
 		
 }
