@@ -120,10 +120,10 @@ public abstract class Protocol {
 
 	}
 
-	private boolean backup(MulticastSocket mdbSocket)
-			throws IOException, NoSuchAlgorithmException, InterruptedException {
+	public boolean backup(MulticastSocket mdbSocket) throws IOException, NoSuchAlgorithmException, InterruptedException {
 		String fileID = getFileData(file);
 		FileInputStream stream = new FileInputStream(this.file);
+		Peer.getInstance().createHashMapEntry(fileID, replicationDeg);
 		boolean success = true;
 
 		// reading from file this.chunkSize bytes at a time
@@ -159,7 +159,7 @@ public abstract class Protocol {
 		return success;
 	}
 
-	private boolean store(DatagramPacket packet, MulticastSocket mcSocket) throws UnsupportedEncodingException {
+	public boolean store(DatagramPacket packet, MulticastSocket mcSocket) throws UnsupportedEncodingException {
 		String packetString = new String(packet.getData(), "UTF-8");
 		String[] packetData = packetString.split(this.endHeader);
 		byte[] chunk = packetData[1].getBytes();

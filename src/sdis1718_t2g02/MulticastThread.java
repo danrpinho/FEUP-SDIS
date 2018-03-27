@@ -50,5 +50,10 @@ public abstract class MulticastThread implements Runnable {
 	@Override
 	public void run() {
 	}
+	
+	protected String getFirstWord(String data) {
+		String[] stringArray = data.split(" ");
+		return stringArray[0];
+	}
 
 }
