@@ -10,7 +10,7 @@ public class Peer {
 
 	protected static Peer instance;
 	protected static String version = null;
-	protected static int peerID;
+	private static int peerID;
 	protected static String accessPoint = null;
 	protected static ThreadMC MCThread;
 	protected static ThreadMDR MDRThread;
@@ -44,7 +44,7 @@ public class Peer {
 
 		else {
 			version = args[0];
-			peerID = Integer.parseInt(args[1]);
+			setPeerID(Integer.parseInt(args[1]));
 			accessPoint = args[2];
 			MCThread = new ThreadMC(args[3], args[4]);
 			MDRThread = new ThreadMDR(args[5], args[6]);
@@ -78,5 +78,19 @@ public class Peer {
 			ChunkStoreRecord record = new ChunkStoreRecord(replicationDeg);
 			fileStores.put(fileID, record);
 		}
+	}
+
+	/**
+	 * @return the peerID
+	 */
+	public static int getPeerID() {
+		return peerID;
+	}
+
+	/**
+	 * @param peerID the peerID to set
+	 */
+	public static void setPeerID(int peerID) {
+		Peer.peerID = peerID;
 	}
 }
