@@ -25,9 +25,9 @@ public abstract class Protocol {
 	protected String senderID;
 	protected File file;
 	final protected int chunkSize = 64000;
-	public final char CR = (char) 0x0D;
-	public final char LF = (char) 0x0A;
-	public final String endHeader = "" + this.CR + this.LF + this.CR + this.LF;
+	public final static char CR = (char) 0x0D;
+	public final static char LF = (char) 0x0A;
+	public final static String endHeader = "" + CR + LF + CR + LF;
 	private int chunkCount;
 	private int replicationDeg;
 
@@ -160,23 +160,7 @@ public abstract class Protocol {
 		return success;
 	}
 
-	public boolean store(DatagramPacket packet, MulticastSocket mcSocket) throws UnsupportedEncodingException {
-		String packetString = new String(packet.getData(), "UTF-8");
-		String[] packetData = packetString.split(this.endHeader);
-		byte[] chunk = packetData[1].getBytes();
-		String[] header = packetData[1].split(" ");
-		packetString = null;
-		packetData = null;
-		if (header[2].equals(this.senderID)) // avoids storing chunks
-			return false;
-
-		// TODO implementar store
-		// TODO guardar packet
-
-		// TODO mandar para o MC o stored
-		// TODO
-		return false;
-	}
+	
 
 	private byte[] createPutchunkHeader(String version, String senderID, String fileID, int chunkNo,
 			int replicationDeg) {
@@ -184,9 +168,8 @@ public abstract class Protocol {
 		return res;
 	}
 
-	private byte[] createStoredHeader(String version, String senderID, String fileID, int chunkNo, int replicationDeg) {
+	public byte[] createStoredHeader(String version, String senderID, String fileID, int chunkNo) {
 		byte[] res = createHeader(MessageType.STORED, fileID, chunkNo, -1);
 		return res;
 	}
-
 }

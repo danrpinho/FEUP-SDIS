@@ -30,7 +30,7 @@ public class ThreadMC extends MulticastThread {
 					case "REMOVED":
 						break;
 					default:
-						throw new IOException();
+						throw new IOException("Invalid packet header!");
 				}
 								
 			} catch (IOException e) {
