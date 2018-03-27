@@ -14,6 +14,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Objects;
+import java.lang.Thread;
 
 import sdis1718_t2g02.Protocol.MessageType;
 
@@ -23,8 +24,8 @@ public abstract class Protocol {
 	protected String senderID;
 	protected File file;
 	final protected int chunkSize = 64000;
-	public final char CR  = (char) 0x0D;
-	public final char LF  = (char) 0x0A; 
+	public final char CR = (char) 0x0D;
+	public final char LF = (char) 0x0A;
 	public final String endHeader = "" + this.CR + this.LF + this.CR + this.LF;
 	private int chunkCount;
 	private int replicationDeg;
@@ -32,11 +33,11 @@ public abstract class Protocol {
 	public enum MessageType {
 		PUTCHUNK, STORED, GETCHUNK, CHUNK, DELETE, REMOVED
 	};
-	
+
 	public enum ProtocolType {
 		BACKUP, RESTORE, DELETE, RECLAIM
 	}
-	
+
 	/**
 	 * @brief Creates a message header.
 	 * @param type
@@ -46,7 +47,7 @@ public abstract class Protocol {
 	 * @return
 	 */
 	public byte[] createHeader(MessageType type, String fileID, int chunkNo, int replicationDeg) {
-		//header has at least type, version, sender and file id
+		// header has at least type, version, sender and file id
 		String res = type.name() + " " + this.version + " " + this.senderID + " " + fileID;
 		if (chunkNo != -1) {
 			String secondPart = new String();
@@ -60,7 +61,8 @@ public abstract class Protocol {
 	}
 
 	/**
-	 * @brief Acquires a file's metadata, in order to create the fileID parameter for the header.
+	 * @brief Acquires a file's metadata, in order to create the fileID parameter
+	 *        for the header.
 	 * @param file
 	 * @return
 	 * @throws IOException
@@ -72,21 +74,22 @@ public abstract class Protocol {
 		String last = Files.getLastModifiedTime(file.toPath(), LinkOption.NOFOLLOW_LINKS).toString();
 		String owner = Files.getOwner(file.toPath(), LinkOption.NOFOLLOW_LINKS).toString();
 		String temp = name + "::" + size + "::" + last + "::" + owner;
-		
+
 		MessageDigest digest = MessageDigest.getInstance("SHA-256");
 		byte[] initialData = digest.digest(temp.getBytes(StandardCharsets.UTF_8));
 		String hashedData = encodeByteArray(initialData);
-		return hashedData;		
+		return hashedData;
 	}
-	
+
 	/**
-	 * @brief Encodes a byte array to a String representation of their hexadecimal representations.
+	 * @brief Encodes a byte array to a String representation of their hexadecimal
+	 *        representations.
 	 * @param data
 	 * @return
 	 */
 	private String encodeByteArray(byte[] data) {
 		StringBuilder sb = new StringBuilder();
-		for (byte b: data) {
+		for (byte b : data) {
 			sb.append(String.format("%02X", b));
 		}
 		return sb.toString();
@@ -107,22 +110,23 @@ public abstract class Protocol {
 				this.chunkCount++;
 		}
 	}
-	
+
 	public Protocol(ProtocolType type, String version, String senderID) {
 		this.version = version;
 		this.senderID = senderID;
 		if (type == ProtocolType.BACKUP) {
 			throw new IllegalArgumentException("Protocol requires replication degree and file path!");
 		}
-		
-		
+
 	}
-	
-	private boolean backup(MulticastSocket mdbSocket) throws IOException, NoSuchAlgorithmException {
+
+	public boolean backup(MulticastSocket mdbSocket) throws IOException, NoSuchAlgorithmException, InterruptedException {
 		String fileID = getFileData(file);
-		FileInputStream stream = new FileInputStream(this.file);	
-		
-		//reading from file this.chunkSize bytes at a time
+		FileInputStream stream = new FileInputStream(this.file);
+		Peer.getInstance().createHashMapEntry(fileID, replicationDeg);
+		boolean success = true;
+
+		// reading from file this.chunkSize bytes at a time
 		for (int currentChunk = 0; currentChunk < this.chunkCount; currentChunk++) {
 			int resendCounter = 0;
 			while (resendCounter < 5) {
@@ -139,37 +143,42 @@ public abstract class Protocol {
 
 				DatagramPacket packet = new DatagramPacket(message, message.length);
 				mdbSocket.send(packet);
+				long timeout = (long) (1000 * Math.pow(2, resendCounter));
+				Thread.sleep(timeout);
+				if (Peer.getInstance().getFileStores().contains(fileID)
+						&& Peer.getInstance().getFileStores().get(fileID).peers.containsKey(currentChunk)) {
+					if (Peer.getInstance().getFileStores().get(fileID).peers.get(currentChunk)
+							.size() >= this.replicationDeg)
+						break;
+				}
 				resendCounter++;
 			}
+			if (resendCounter == 5)
+				success = false;
 		}
-		return false;
-		
-		//TODO finish backup and add listening for STORED messages
+		return success;
 	}
-	
-	private boolean store(DatagramPacket packet, MulticastSocket mcSocket) throws UnsupportedEncodingException {
+
+	public boolean store(DatagramPacket packet, MulticastSocket mcSocket) throws UnsupportedEncodingException {
 		String packetString = new String(packet.getData(), "UTF-8");
 		String[] packetData = packetString.split(this.endHeader);
 		byte[] chunk = packetData[1].getBytes();
 		String[] header = packetData[1].split(" ");
-		packetString = null; packetData = null;
-		if(header[2].equals(this.senderID)) 	//avoids storing chunks
+		packetString = null;
+		packetData = null;
+		if (header[2].equals(this.senderID)) // avoids storing chunks
 			return false;
-		
-		
-		
-		
+
 		// TODO implementar store
 		// TODO guardar packet
-		
-		
-		
+
 		// TODO mandar para o MC o stored
 		// TODO
 		return false;
 	}
-	
-	private byte[] createPutchunkHeader(String version, String senderID, String fileID, int chunkNo, int replicationDeg) {
+
+	private byte[] createPutchunkHeader(String version, String senderID, String fileID, int chunkNo,
+			int replicationDeg) {
 		byte[] res = createHeader(MessageType.PUTCHUNK, fileID, chunkNo, replicationDeg);
 		return res;
 	}
