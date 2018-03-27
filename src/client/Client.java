@@ -1,16 +1,42 @@
 package client;
 
 import java.io.File;
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 
+
+import rmi.RMIInterface;
 import utils.utils;
 
 public class Client {
-	protected static File file;
+	private static File file;
+	private static int repDegree = -1;
+	private static RMIInterface rmiStub; 
+	private static int space;
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws RemoteException {
 		showMainMenu();
 		if(!validArgs(args))
 			return;
+		
+		switch(args[0]) {
+		case ClientCommands.BACKUP:
+			rmiStub.backup(file, repDegree);
+			break;
+		case ClientCommands.RESTORE:
+			rmiStub.restore(args[2]);
+			break;
+		case ClientCommands.DELETE:
+			rmiStub.delete(args[2]);
+			break;
+		case ClientCommands.RECLAIM:
+			rmiStub.reclaim(space);
+			break;
+		case ClientCommands.STATE:
+			rmiStub.state();
+		
+		}
 	}
 
 	private static void showMainMenu() {
@@ -25,9 +51,14 @@ public class Client {
 		
 		boolean retValue = true;
 		
+		if(initRMI(args[0]) == false) {
+			ClientCommands.printUsage();
+			return false;
+		}
+			
+		
 		if(args[1].equals(ClientCommands.BACKUP)) {
 			
-			int repDegree=-1;
 			
 			if(args.length != ClientCommands.BACKUP_NoArgs) 
 				retValue = false;		
@@ -72,11 +103,23 @@ public class Client {
 		else if(args[1].equals(ClientCommands.RECLAIM)) {
 			if(args.length != ClientCommands.RECLAIM_NoArgs)
 				retValue = false;
+			else if(!utils.validInt(args[2], space))
+				retValue = false;
 			
 			if(retValue == false)
 				System.out.println(ClientCommands.RECLAIM_Usage);
 			
 			return retValue;
+		}
+		
+		else if(args[1].equals(ClientCommands.STATE)) {
+			if(args.length != ClientCommands.STATE_NoArgs) {
+				System.out.println(ClientCommands.STATE_Usage);
+				return false;
+			}
+			
+			return true;
+			
 		}
 		
 		else
@@ -85,7 +128,18 @@ public class Client {
 		
 	}
 	
-	
-	
-
+	private static boolean initRMI(String accessPoint) {
+		try {
+			Registry registry = LocateRegistry.getRegistry(null);
+			RMIInterface rmiStub = (RMIInterface) registry.lookup(accessPoint);
+			
+		}catch(Exception e) {
+			System.err.println("RMI exception: "+e.toString());			
+			e.printStackTrace();
+			
+			return false;
+		}
+		
+		return true;
+	}
 }
