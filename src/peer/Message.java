@@ -47,6 +47,26 @@ public final class Message {
 		byte[] res = createHeader(MessageType.STORED, version, peerID, fileID, chunkNo, -1);
 		return res;
 	}
+	
+	public static byte[] createGetchunkHeader(String version, String peerID, String fileID, int chunkNo) {
+		byte[] res = createHeader(MessageType.GETCHUNK, version, peerID, fileID, chunkNo, -1);
+		return res;
+	}
+	
+	public static byte[] createChunkHeader(String version, String peerID, String fileID, int chunkNo) {
+		byte[] res = createHeader(MessageType.CHUNK, version, peerID, fileID, chunkNo, -1);
+		return res;
+	}
+	
+	public static byte[] createDeleteHeader(String version, String peerID, String fileID, int chunkNo) {
+		byte[] res = createHeader(MessageType.DELETE, version, peerID, fileID, -1, -1);
+		return res;
+	}
+	
+	public static byte[] createRemovedHeader(String version, String peerID, String fileID, int chunkNo) {
+		byte[] res = createHeader(MessageType.REMOVED, version, peerID, fileID, chunkNo, -1);
+		return res;
+	}
 
 
 }
