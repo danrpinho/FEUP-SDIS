@@ -12,9 +12,9 @@ public abstract class MulticastThread implements Runnable {
 	protected InetAddress address;
 	protected MulticastSocket socket;
 	
-	MulticastThread(String address, String port) throws IOException{
+	MulticastThread(String address, int port) throws IOException{
 		this.address = InetAddress.getByName(address);
-		this.port = Integer.parseInt(port);
+		this.port = port;
 		this.socket = new MulticastSocket(this.port);
 		this.socket.joinGroup(this.address);
 	}

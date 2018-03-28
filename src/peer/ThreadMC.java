@@ -8,7 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class ThreadMC extends MulticastThread {
 
-	public ThreadMC(String address, String port) throws IOException {
+	public ThreadMC(String address, int port) throws IOException {
 		super(address, port);
 	}
 	

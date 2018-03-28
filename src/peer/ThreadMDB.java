@@ -8,7 +8,7 @@ import java.net.MulticastSocket;
 
 public class ThreadMDB extends MulticastThread {
 
-	public ThreadMDB(String address, String port) throws IOException {
+	public ThreadMDB(String address, int port) throws IOException {
 		super(address, port);
 	}
 

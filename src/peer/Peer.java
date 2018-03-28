@@ -10,6 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 
 import rmi.RMIInterface;
+import utils.utils;
 
 import java.rmi.registry.Registry;
 import java.rmi.registry.LocateRegistry;
@@ -26,6 +27,9 @@ public class Peer implements RMIInterface{
 	protected static ThreadMC MCThread;
 	protected static ThreadMDR MDRThread;
 	protected static ThreadMDB MDBThread;
+	private static int MCPort;
+	private static int MDRPort;
+	private static int MDBPort;
 	
 	protected static ConcurrentHashMap<String, ChunkStoreRecord> fileStores = new ConcurrentHashMap<String, ChunkStoreRecord>();
 
@@ -40,27 +44,63 @@ public class Peer implements RMIInterface{
 	public Peer() {};
 	
 	public static void main(String[] args) throws IOException {
-		getInstance();
-		if (args.length != 9) {
-			System.out.println(
-					"Usage: java Peer <Protocol_Version> <Server_ID> <Service_Access_Point> <MC_IP_Multicast_Address> <MC_Port> <MDB_IP_Multicast_Address> <MDB_Port> <MDR_IP_Multicast_Address> <MRD_Port>");
+		getInstance();		
+		
+		if(!validArgs(args))
+			return;
+		
+		if(initRMI(accessPoint) == false) {
 			return;
 		}
-
-		else {
-			version = args[0];
-			setPeerID(Integer.parseInt(args[1]));
-			accessPoint = args[2];
-			MCThread = new ThreadMC(args[3], args[4]);
-			MDRThread = new ThreadMDR(args[5], args[6]);
-			MDBThread = new ThreadMDB(args[7], args[8]);
-			
-			if(initRMI(accessPoint) == false) {
-				return;
-			}
-			
-			launchThreads();
+		
+		MCThread = new ThreadMC(args[3], MCPort);
+		MDRThread = new ThreadMDR(args[5], MDRPort);
+		MDBThread = new ThreadMDB(args[7], MDBPort);
+		
+		launchThreads();
+		
+		
+	}
+	
+	public static boolean validArgs(String[] args) {
+		boolean retValue = true;
+		if(args.length != PeerCommands.PEER_NoArgs) 
+			retValue = false;
+		
+		
+		else if(!utils.validInt(args[1], peerID)) {
+			System.out.println("<Peer_ID> must be an integer");
+			retValue = false;
 		}
+		
+		else if(peerID <= 0){
+			System.out.println("<Peer_ID> must be an integer greater than 0");
+			retValue = false;
+		}
+		
+		else if(!utils.validInt(args[4], MCPort)) {
+			System.out.println("<MC_Port> must be an integer");
+			retValue = false;
+		}
+		else if(!utils.validInt(args[6], MDRPort)) {
+			System.out.println("<MDR_Port> must be an integer");
+			retValue = false;
+		}
+		else if(!utils.validInt(args[6], MDBPort)) {
+			System.out.println("<MDB_Port> must be an integer");
+			retValue = false;
+		}				
+		else {
+			setPeerID(peerID);
+			accessPoint = args[2];
+		}
+		
+		
+		if(retValue == false)
+			PeerCommands.printUsage();
+		
+		return retValue;
+		
 	}
 	
 	public static boolean initRMI(String accessPoint) {

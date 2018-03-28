@@ -4,7 +4,7 @@ import java.io.IOException;
 
 public class ThreadMDR extends MulticastThread {
 
-	public ThreadMDR(String address, String port) throws IOException {
+	public ThreadMDR(String address, int port) throws IOException {
 		super(address, port);
 	}
 	
