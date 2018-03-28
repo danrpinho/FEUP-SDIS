@@ -6,24 +6,27 @@ public final class Utils {
 	
 	private Utils() {}
 	
-	public static boolean validFilePath(String filePath, File file) {
-		file = new File(filePath);
+	public static File validFilePath(String filePath) {
+		File file = new File(filePath);
 		
 		if(file.exists())
-			return true;		
+			return file;		
 		else
-			return false;
+			return null;
 			
 	}
 	
-	public static boolean validInt(String s_integer, int integer) {
+	public static int validInt(String s_integer) {
+			int integer = -1;
 		try {
 			integer = Integer.parseInt(s_integer);
+			System.out.print("validInt");
+			System.out.println(integer);
 		}catch(NumberFormatException e) {
-			return false;
+			return -1;
 		}
 
-		return true;
+		return integer;
 	}
 	
 	/**

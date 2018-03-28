@@ -71,25 +71,19 @@ public class Peer implements RMIInterface{
 			retValue = false;
 		
 		
-		else if(!Utils.validInt(args[1], peerID)) {
-			System.out.println("<Peer_ID> must be an integer");
-			retValue = false;
-		}
-		
-		else if(peerID <= 0){
+		else if( (peerID=Utils.validInt(args[1])) <= 0) {
 			System.out.println("<Peer_ID> must be an integer greater than 0");
 			retValue = false;
 		}
-		
-		else if(!Utils.validInt(args[4], MCPort)) {
+		else if((MCPort=Utils.validInt(args[1])) <= 0) {
 			System.out.println("<MC_Port> must be an integer");
 			retValue = false;
 		}
-		else if(!Utils.validInt(args[6], MDRPort)) {
+		else if((MDRPort=Utils.validInt(args[1])) <= 0) {
 			System.out.println("<MDR_Port> must be an integer");
 			retValue = false;
 		}
-		else if(!Utils.validInt(args[6], MDBPort)) {
+		else if((MDBPort=Utils.validInt(args[1])) <= 0) {
 			System.out.println("<MDB_Port> must be an integer");
 			retValue = false;
 		}				

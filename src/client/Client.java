@@ -62,9 +62,9 @@ public class Client {
 			
 			if(args.length != ClientCommands.BACKUP_NoArgs) 
 				retValue = false;		
-			else if(!Utils.validFilePath(args[2], file))
+			else if((file=Utils.validFilePath(args[2])) != null)
 				retValue = false;						
-			else if(!Utils.validInt(args[3], repDegree))
+			else if((repDegree=Utils.validInt(args[1])) <= 0)
 				retValue = false;			
 			else if(repDegree < 1 || repDegree > 9) {
 				System.out.println("The replication degree parameter must be a value between 1 and 9");
@@ -103,7 +103,7 @@ public class Client {
 		else if(args[1].equals(ClientCommands.RECLAIM)) {
 			if(args.length != ClientCommands.RECLAIM_NoArgs)
 				retValue = false;
-			else if(!Utils.validInt(args[2], space))
+			else if((space=Utils.validInt(args[1])) <= 0)
 				retValue = false;
 			
 			if(retValue == false)
