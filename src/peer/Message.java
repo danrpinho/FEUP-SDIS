@@ -22,9 +22,9 @@ public final class Message {
 	 * @param replicationDeg
 	 * @return
 	 */
-	public static byte[] createHeader(MessageType type, String fileID, int chunkNo, int replicationDeg) {
+	public static byte[] createHeader(MessageType type, String version, String peerID, String fileID, int chunkNo, int replicationDeg) {
 		// header has at least type, version, sender and file id
-		String res = type.name() + " " + Peer.version + " " + Peer.peerID + " " + fileID;
+		String res = type.name() + " " + version + " " + peerID + " " + fileID;
 		if (chunkNo != -1) {
 			String secondPart = new String();
 			if (replicationDeg == -1)
@@ -37,14 +37,14 @@ public final class Message {
 	}
 	
 	
-	public static byte[] createPutchunkHeader(String fileID, int chunkNo,
+	public static byte[] createPutchunkHeader(String version, String peerID, String fileID, int chunkNo,
 			int replicationDeg) {
-		byte[] res = createHeader(MessageType.PUTCHUNK, fileID, chunkNo, replicationDeg);
+		byte[] res = createHeader(MessageType.PUTCHUNK, version, peerID, fileID, chunkNo, replicationDeg);
 		return res;
 	}
 
-	public static byte[] createStoredHeader(String fileID, int chunkNo) {
-		byte[] res = createHeader(MessageType.STORED, fileID, chunkNo, -1);
+	public static byte[] createStoredHeader(String version, String peerID, String fileID, int chunkNo) {
+		byte[] res = createHeader(MessageType.STORED, version, peerID, fileID, chunkNo, -1);
 		return res;
 	}
 

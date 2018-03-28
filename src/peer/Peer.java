@@ -27,7 +27,7 @@ public class Peer implements RMIInterface{
 	protected static String version = null;
 	protected static int peerID;
 	protected static String accessPoint = null;
-	protected static ThreadMC MCThread;
+	private static ThreadMC MCThread;
 	protected static ThreadMDR MDRThread;
 	protected static ThreadMDB MDBThread;
 	private static int MCPort;
@@ -56,7 +56,7 @@ public class Peer implements RMIInterface{
 			return;
 		}
 		
-		MCThread = new ThreadMC(args[3], MCPort);
+		setMCThread(new ThreadMC(args[3], MCPort));
 		MDRThread = new ThreadMDR(args[5], MDRPort);
 		MDBThread = new ThreadMDB(args[7], MDBPort);
 		
@@ -145,13 +145,13 @@ public class Peer implements RMIInterface{
 	}
 	
 	private static void launchThreads() {
-		MCThread.run();
+		getMCThread().run();
 		MDRThread.run();
 		MDBThread.run();
 	}
 
 	private static void closeThreads() throws IOException {
-		MCThread.close();
+		getMCThread().close();
 		MDRThread.close();
 		MDBThread.close();
 	}
@@ -183,5 +183,27 @@ public class Peer implements RMIInterface{
 	 */
 	public static void setPeerID(int peerID) {
 		Peer.peerID = peerID;
+	}
+
+	public static String getVersion() {
+		return version;
+	}
+
+	public static void setVersion(String version) {
+		Peer.version = version;
+	}
+
+	/**
+	 * @return the mCThread
+	 */
+	public static ThreadMC getMCThread() {
+		return MCThread;
+	}
+
+	/**
+	 * @param mCThread the mCThread to set
+	 */
+	public static void setMCThread(ThreadMC mCThread) {
+		MCThread = mCThread;
 	}
 }

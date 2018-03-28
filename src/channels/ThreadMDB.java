@@ -57,7 +57,7 @@ public class ThreadMDB extends MulticastThread {
 		out.close();
 		
 		byte[] confirmationData = Message.createStoredHeader(header[1], Integer.toString(currentID), header[3], chunkNo);
-		Peer.getInstance().MCThread.socket.send(new DatagramPacket(confirmationData, confirmationData.length));
+		Peer.getInstance().getMCThread().socket.send(new DatagramPacket(confirmationData, confirmationData.length));
 		
 		// TODO resolver statics do Protocol.createStoredHeader
 		return true;

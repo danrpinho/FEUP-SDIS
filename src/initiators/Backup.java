@@ -91,6 +91,8 @@ public abstract class Backup {
 		FileInputStream stream = new FileInputStream(this.file);
 		Peer.getInstance().createHashMapEntry(fileID, replicationDeg);
 		boolean success = true;
+		String version = Peer.getInstance().getVersion();
+		String peerID = ((Integer) Peer.getInstance().getPeerID()).toString();
 
 		// reading from file this.chunkSize bytes at a time
 		for (int currentChunk = 0; currentChunk < this.chunkCount; currentChunk++) {
@@ -98,8 +100,7 @@ public abstract class Backup {
 			while (resendCounter < 5) {
 				byte[] currentData = new byte[this.chunkSize]; // reading from file
 				stream.read(currentData);
-				byte[] currentHeader = Message.createPutchunkHeader(fileID, currentChunk,
-						this.replicationDeg); // creating header
+				byte[] currentHeader = Message.createPutchunkHeader(version, peerID, fileID, currentChunk, this.replicationDeg); // creating header
 
 				ByteArrayOutputStream outputStream = new ByteArrayOutputStream(currentHeader.length + this.chunkSize);
 				outputStream.write(currentHeader);
