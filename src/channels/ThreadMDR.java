@@ -1,4 +1,4 @@
-package peer;
+package channels;
 
 import java.io.IOException;
 

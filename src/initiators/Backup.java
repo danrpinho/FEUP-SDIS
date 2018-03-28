@@ -1,4 +1,4 @@
-package peer;
+package initiators;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -15,51 +15,29 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Objects;
 
-import peer.Protocol.MessageType;
+import peer.Message;
+import peer.Peer;
+import utils.Utils;
 
 import java.lang.Thread;
 
-public abstract class Protocol {
+public abstract class Backup {
 
-	protected String version;
-	protected String senderID;
+	/*protected String version;
+	protected String senderID;*/
 	protected File file;
 	final protected int chunkSize = 64000;
-	public final static char CR = (char) 0x0D;
-	public final static char LF = (char) 0x0A;
-	public final static String endHeader = "" + CR + LF + CR + LF;
+	
 	private int chunkCount;
 	private int replicationDeg;
 
-	public enum MessageType {
-		PUTCHUNK, STORED, GETCHUNK, CHUNK, DELETE, REMOVED
-	};
+	
 
-	public enum ProtocolType {
+	/*public enum ProtocolType {
 		BACKUP, RESTORE, DELETE, RECLAIM
-	}
+	}*/
 
-	/**
-	 * @brief Creates a message header.
-	 * @param type
-	 * @param fileID
-	 * @param chunkNo
-	 * @param replicationDeg
-	 * @return
-	 */
-	public byte[] createHeader(MessageType type, String fileID, int chunkNo, int replicationDeg) {
-		// header has at least type, version, sender and file id
-		String res = type.name() + " " + this.version + " " + this.senderID + " " + fileID;
-		if (chunkNo != -1) {
-			String secondPart = new String();
-			if (replicationDeg == -1)
-				secondPart = " " + chunkNo;
-			else
-				secondPart = " " + chunkNo + " " + replicationDeg;
-			res = res + secondPart + this.endHeader;
-		}
-		return res.getBytes();
-	}
+	
 
 	/**
 	 * @brief Acquires a file's metadata, in order to create the fileID parameter
@@ -78,48 +56,35 @@ public abstract class Protocol {
 
 		MessageDigest digest = MessageDigest.getInstance("SHA-256");
 		byte[] initialData = digest.digest(temp.getBytes(StandardCharsets.UTF_8));
-		String hashedData = encodeByteArray(initialData);
+		String hashedData = Utils.encodeByteArray(initialData);
 		return hashedData;
 	}
 
-	/**
-	 * @brief Encodes a byte array to a String representation of their hexadecimal
-	 *        representations.
-	 * @param data
-	 * @return
-	 */
-	private String encodeByteArray(byte[] data) {
-		StringBuilder sb = new StringBuilder();
-		for (byte b : data) {
-			sb.append(String.format("%02X", b));
-		}
-		return sb.toString();
-	}
-
-	public Protocol(ProtocolType type, String version, String senderID, String path, int replicationDeg) {
-		this.version = version;
-		this.senderID = senderID;
-		if (type == ProtocolType.BACKUP) {
+	
+	public Backup(/*ProtocolType type, String version, String senderID,*/ File file, int replicationDeg) {
+		/*this.version = version;
+		this.senderID = senderID;*/
+		/*if (type == ProtocolType.BACKUP) {*/
 			if (replicationDeg < 1 || replicationDeg > 9) {
 				throw new IllegalArgumentException("Replication degree must be between 1 and 9");
 			} else
 				this.replicationDeg = replicationDeg;
 
-			this.file = new File(path);
+			this.file = file;
 			this.chunkCount = (int) Math.ceil(file.length() / (double) this.chunkSize);
 			if (file.length() % this.chunkSize == 0)
 				this.chunkCount++;
-		}
+		/*}*/
 	}
 
-	public Protocol(ProtocolType type, String version, String senderID) {
+	/*public Protocol(ProtocolType type, String version, String senderID) {
 		this.version = version;
 		this.senderID = senderID;
 		if (type == ProtocolType.BACKUP) {
 			throw new IllegalArgumentException("Protocol requires replication degree and file path!");
 		}
 
-	}
+	}*/
 
 	public boolean backup(MulticastSocket mdbSocket) throws IOException, NoSuchAlgorithmException, InterruptedException {
 		String fileID = getFileData(file);
@@ -133,7 +98,7 @@ public abstract class Protocol {
 			while (resendCounter < 5) {
 				byte[] currentData = new byte[this.chunkSize]; // reading from file
 				stream.read(currentData);
-				byte[] currentHeader = createPutchunkHeader(this.version, this.senderID, fileID, currentChunk,
+				byte[] currentHeader = Message.createPutchunkHeader(fileID, currentChunk,
 						this.replicationDeg); // creating header
 
 				ByteArrayOutputStream outputStream = new ByteArrayOutputStream(currentHeader.length + this.chunkSize);
@@ -160,16 +125,4 @@ public abstract class Protocol {
 		return success;
 	}
 
-	
-
-	private byte[] createPutchunkHeader(String version, String senderID, String fileID, int chunkNo,
-			int replicationDeg) {
-		byte[] res = createHeader(MessageType.PUTCHUNK, fileID, chunkNo, replicationDeg);
-		return res;
-	}
-
-	public byte[] createStoredHeader(String version, String senderID, String fileID, int chunkNo) {
-		byte[] res = createHeader(MessageType.STORED, fileID, chunkNo, -1);
-		return res;
-	}
 }

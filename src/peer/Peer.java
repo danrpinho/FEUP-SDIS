@@ -9,8 +9,11 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 
+import channels.ThreadMC;
+import channels.ThreadMDB;
+import channels.ThreadMDR;
 import rmi.RMIInterface;
-import utils.utils;
+import utils.Utils;
 
 import java.rmi.registry.Registry;
 import java.rmi.registry.LocateRegistry;
@@ -22,7 +25,7 @@ public class Peer implements RMIInterface{
 
 	protected static Peer instance;
 	protected static String version = null;
-	private static int peerID;
+	protected static int peerID;
 	protected static String accessPoint = null;
 	protected static ThreadMC MCThread;
 	protected static ThreadMDR MDRThread;
@@ -68,7 +71,7 @@ public class Peer implements RMIInterface{
 			retValue = false;
 		
 		
-		else if(!utils.validInt(args[1], peerID)) {
+		else if(!Utils.validInt(args[1], peerID)) {
 			System.out.println("<Peer_ID> must be an integer");
 			retValue = false;
 		}
@@ -78,15 +81,15 @@ public class Peer implements RMIInterface{
 			retValue = false;
 		}
 		
-		else if(!utils.validInt(args[4], MCPort)) {
+		else if(!Utils.validInt(args[4], MCPort)) {
 			System.out.println("<MC_Port> must be an integer");
 			retValue = false;
 		}
-		else if(!utils.validInt(args[6], MDRPort)) {
+		else if(!Utils.validInt(args[6], MDRPort)) {
 			System.out.println("<MDR_Port> must be an integer");
 			retValue = false;
 		}
-		else if(!utils.validInt(args[6], MDBPort)) {
+		else if(!Utils.validInt(args[6], MDBPort)) {
 			System.out.println("<MDB_Port> must be an integer");
 			retValue = false;
 		}				

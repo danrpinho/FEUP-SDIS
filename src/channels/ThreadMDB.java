@@ -1,10 +1,14 @@
-package peer;
+package channels;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.DatagramPacket;
 import java.net.MulticastSocket;
+
+import initiators.Backup;
+import peer.Message;
+import peer.Peer;
 
 public class ThreadMDB extends MulticastThread {
 
@@ -30,11 +34,11 @@ public class ThreadMDB extends MulticastThread {
 	}
 
 	public boolean store(DatagramPacket packet) throws IOException {
-		String[] packetData = new String(packet.getData(), "UTF-8").split(Protocol.endHeader);
+		String[] packetData = new String(packet.getData(), "UTF-8").split(Message.endHeader);
 		byte[] chunk = packetData[1].getBytes();
 		String[] header = packetData[0].split(" ");
 		packetData = null;
-		if (header[2].equals(Integer.toString(Peer.instance.getPeerID()))) // avoids storing chunks
+		if (header[2].equals(Integer.toString(Peer.getInstance().getPeerID()))) // avoids storing chunks
 			return false;
 		
 		int currentID = Peer.getInstance().getPeerID();
@@ -52,7 +56,7 @@ public class ThreadMDB extends MulticastThread {
 		out.write(chunk);
 		out.close();
 		
-		byte[] confirmationData = Protocol.createStoredHeader(header[1], Integer.toString(currentID), header[3], chunkNo);
+		byte[] confirmationData = Message.createStoredHeader(header[1], Integer.toString(currentID), header[3], chunkNo);
 		Peer.getInstance().MCThread.socket.send(new DatagramPacket(confirmationData, confirmationData.length));
 		
 		// TODO resolver statics do Protocol.createStoredHeader

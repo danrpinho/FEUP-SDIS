@@ -1,10 +1,13 @@
-package peer;
+package channels;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.DatagramPacket;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
+
+import peer.ChunkStoreRecord;
+import peer.Peer;
 
 public class ThreadMC extends MulticastThread {
 
