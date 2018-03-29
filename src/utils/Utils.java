@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.MulticastSocket;
+import java.util.Random;
 
 public final class Utils {
 	
@@ -47,6 +48,12 @@ public final class Utils {
 	public static String getFirstWord(String data) {
 		String[] stringArray = data.split(" ");
 		return stringArray[0];
+	}
+	
+	public static int generateRandomInteger(int min, int max) {
+		Random rand = new Random();
+		int randomNum = rand.nextInt((max - min) + 1) + min;
+		return randomNum;
 	}
 	
 	

@@ -5,10 +5,14 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.DatagramPacket;
 import java.net.MulticastSocket;
+import java.util.Random;
 
 import initiators.Backup;
 import peer.Message;
 import peer.Peer;
+import utils.Utils;
+
+import java.util.Random;
 
 public class ThreadMDB extends MulticastThread {
 
@@ -27,13 +31,13 @@ public class ThreadMDB extends MulticastThread {
 				} else {
 					throw new IOException("Invalid packet header!");
 				}
-			} catch (IOException e) {
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
 	}
 
-	public boolean store(DatagramPacket packet) throws IOException {
+	public boolean store(DatagramPacket packet) throws IOException, InterruptedException {
 		String[] packetData = new String(packet.getData(), "UTF-8").split(Message.endHeader);
 		byte[] chunk = packetData[1].getBytes();
 		String[] header = packetData[0].split(" ");
@@ -57,6 +61,8 @@ public class ThreadMDB extends MulticastThread {
 		out.close();
 		
 		byte[] confirmationData = Message.createStoredHeader(header[1], Integer.toString(currentID), header[3], chunkNo);
+		long timeout  = (long) Utils.generateRandomInteger(0, 400);
+		Thread.sleep(timeout);
 		Peer.getInstance().getMCThread().socket.send(new DatagramPacket(confirmationData, confirmationData.length));
 		
 		// TODO resolver statics do Protocol.createStoredHeader
