@@ -40,28 +40,6 @@ public class Backup implements Runnable {
 
 	
 
-	/**
-	 * @brief Acquires a file's metadata, in order to create the fileID parameter
-	 *        for the header.
-	 * @param file
-	 * @return
-	 * @throws IOException
-	 * @throws NoSuchAlgorithmException
-	 */
-	public String getFileData(File file) throws IOException, NoSuchAlgorithmException {
-		String name = file.getName();
-		String size = Objects.toString(file.length());
-		String last = Files.getLastModifiedTime(file.toPath(), LinkOption.NOFOLLOW_LINKS).toString();
-		String owner = Files.getOwner(file.toPath(), LinkOption.NOFOLLOW_LINKS).toString();
-		String temp = name + "::" + size + "::" + last + "::" + owner;
-
-		MessageDigest digest = MessageDigest.getInstance("SHA-256");
-		byte[] initialData = digest.digest(temp.getBytes(StandardCharsets.UTF_8));
-		String hashedData = Utils.encodeByteArray(initialData);
-		return hashedData;
-	}
-
-	
 	public Backup(/*ProtocolType type, String version, String senderID,*/ File file, int replicationDeg) throws IOException {
 		/*this.version = version;
 		this.senderID = senderID;*/
@@ -133,7 +111,7 @@ public class Backup implements Runnable {
 	@Override
 	public void run(){
 		try {
-		String fileID = getFileData(file);
+		String fileID = Message.getFileData(file);
 		FileInputStream stream = new FileInputStream(this.file);
 		Peer.getInstance().createHashMapEntry(fileID, replicationDeg);
 		boolean success = true;
