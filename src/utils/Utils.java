@@ -1,6 +1,9 @@
 package utils;
 
 import java.io.File;
+import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.MulticastSocket;
 
 public final class Utils {
 	
@@ -40,5 +43,12 @@ public final class Utils {
 		}
 		return sb.toString();
 	}
+	
+	public static String getFirstWord(String data) {
+		String[] stringArray = data.split(" ");
+		return stringArray[0];
+	}
+	
+	
 
 }

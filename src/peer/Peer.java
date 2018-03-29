@@ -12,6 +12,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import channels.ThreadMC;
 import channels.ThreadMDB;
 import channels.ThreadMDR;
+import initiators.Backup;
 import rmi.RMIInterface;
 import utils.Utils;
 
@@ -28,11 +29,12 @@ public class Peer implements RMIInterface{
 	protected static int peerID;
 	protected static String accessPoint = null;
 	private static ThreadMC MCThread;
-	protected static ThreadMDR MDRThread;
-	protected static ThreadMDB MDBThread;
-	private static int MCPort;
-	private static int MDRPort;
-	private static int MDBPort;
+	private static ThreadMDR MDRThread;
+	private static ThreadMDB MDBThread;
+	private static int mcPort;
+	private static int mdrPort;
+	private static int mdbPort;
+	
 	
 	protected static ConcurrentHashMap<String, ChunkStoreRecord> fileStores = new ConcurrentHashMap<String, ChunkStoreRecord>();
 
@@ -52,13 +54,15 @@ public class Peer implements RMIInterface{
 		if(!validArgs(args))
 			return;
 		
-		if(initRMI(accessPoint) == false) {
+		if(initRMI(accessPoint) == false) 
 			return;
-		}
-		System.out.println(MCPort);
-		setMCThread(new ThreadMC(args[3], MCPort));
-		MDRThread = new ThreadMDR(args[5], MDRPort);
-		MDBThread = new ThreadMDB(args[7], MDBPort);
+		
+		
+		
+		
+		MCThread = new ThreadMC(args[3], mcPort);
+		MDRThread = new ThreadMDR(args[5], mdrPort);
+		MDBThread = new ThreadMDB(args[7], mdbPort);
 		
 		launchThreads();
 		
@@ -75,15 +79,15 @@ public class Peer implements RMIInterface{
 			System.out.println("<Peer_ID> must be an integer greater than 0");
 			retValue = false;
 		}
-		else if((MCPort=Utils.validInt(args[4])) <= 0) {
+		else if((mcPort=Utils.validInt(args[4])) <= 0) {
 			System.out.println("<MC_Port> must be an integer");
 			retValue = false;
 		}
-		else if((MDRPort=Utils.validInt(args[6])) <= 0) {
+		else if((mdrPort=Utils.validInt(args[6])) <= 0) {
 			System.out.println("<MDR_Port> must be an integer");
 			retValue = false;
 		}
-		else if((MDBPort=Utils.validInt(args[8])) <= 0) {
+		else if((mdbPort=Utils.validInt(args[8])) <= 0) {
 			System.out.println("<MDB_Port> must be an integer");
 			retValue = false;
 		}				
@@ -119,6 +123,13 @@ public class Peer implements RMIInterface{
 	}
 	
 	public void backup(File file, int repDegree) {
+		System.out.println("Backup function called");
+		try {
+			new Backup(file, repDegree).run();
+		}
+		catch(Exception e) {
+			System.out.println("Exception caught ");
+		}
 		
 	}
 	
@@ -186,7 +197,21 @@ public class Peer implements RMIInterface{
 	public static void setVersion(String version) {
 		Peer.version = version;
 	}
-
+	
+	
+	/*public static boolean createSockets() {
+		try {
+			MCSocket = new MulticastSocket(MCPort);
+			MDBSocket = new MulticastSocket(MDBPort);
+			MDRSocket = new MulticastSocket(MDRPort);
+			
+		}catch(Exception e) {
+			System.out.println("Could not initialize sockets");
+			return false;
+		}
+		return true;
+	}*/
+	
 	/**
 	 * @return the mCThread
 	 */
@@ -199,5 +224,9 @@ public class Peer implements RMIInterface{
 	 */
 	public static void setMCThread(ThreadMC mCThread) {
 		MCThread = mCThread;
+	}
+	
+	public static int getMDBPort() {
+		return mdbPort;
 	}
 }

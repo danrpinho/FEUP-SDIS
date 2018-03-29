@@ -20,6 +20,7 @@ public class Client {
 		if(!validArgs(args))
 			return;
 		
+		System.out.println("success");
 		switch(args[0]) {
 		case ClientCommands.BACKUP:
 			rmiStub.backup(file, repDegree);
@@ -60,12 +61,17 @@ public class Client {
 		if(args[1].equals(ClientCommands.BACKUP)) {
 			
 			
-			if(args.length != ClientCommands.BACKUP_NoArgs) 
+			if(args.length != ClientCommands.BACKUP_NoArgs) { 
 				retValue = false;		
-			else if((file=Utils.validFilePath(args[2])) != null)
-				retValue = false;						
-			else if((repDegree=Utils.validInt(args[1])) <= 0)
+			}
+			else if((file=Utils.validFilePath(args[2])) != null) {
+				System.out.println("The filePath is not valid");
+				retValue = false;
+			}						
+			else if((repDegree=Utils.validInt(args[3])) <= 0) {
+				System.out.println("The replication degree must be an integer");
 				retValue = false;			
+			}
 			else if(repDegree < 1 || repDegree > 9) {
 				System.out.println("The replication degree parameter must be a value between 1 and 9");
 				retValue = false;
@@ -122,8 +128,10 @@ public class Client {
 			
 		}
 		
-		else
+		else {
+			ClientCommands.printUsage();
 			return false;
+		}
 		
 		
 	}

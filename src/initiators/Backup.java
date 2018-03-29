@@ -21,7 +21,7 @@ import utils.Utils;
 
 import java.lang.Thread;
 
-public abstract class Backup {
+public class Backup implements Runnable {
 
 	/*protected String version;
 	protected String senderID;*/
@@ -30,6 +30,7 @@ public abstract class Backup {
 	
 	private int chunkCount;
 	private int replicationDeg;
+	private MulticastSocket mdbSocket = null;
 
 	
 
@@ -61,7 +62,7 @@ public abstract class Backup {
 	}
 
 	
-	public Backup(/*ProtocolType type, String version, String senderID,*/ File file, int replicationDeg) {
+	public Backup(/*ProtocolType type, String version, String senderID,*/ File file, int replicationDeg) throws IOException {
 		/*this.version = version;
 		this.senderID = senderID;*/
 		/*if (type == ProtocolType.BACKUP) {*/
@@ -74,6 +75,8 @@ public abstract class Backup {
 			this.chunkCount = (int) Math.ceil(file.length() / (double) this.chunkSize);
 			if (file.length() % this.chunkSize == 0)
 				this.chunkCount++;
+			
+			mdbSocket = new MulticastSocket(Peer.getMDBPort());
 		/*}*/
 	}
 
@@ -86,7 +89,7 @@ public abstract class Backup {
 
 	}*/
 
-	public boolean backup(MulticastSocket mdbSocket) throws IOException, NoSuchAlgorithmException, InterruptedException {
+	/*public void run(MulticastSocket mdbSocket) throws IOException, NoSuchAlgorithmException, InterruptedException {
 		String fileID = getFileData(file);
 		FileInputStream stream = new FileInputStream(this.file);
 		Peer.getInstance().createHashMapEntry(fileID, replicationDeg);
@@ -124,6 +127,51 @@ public abstract class Backup {
 				success = false;
 		}
 		return success;
+	}*/
+
+
+	@Override
+	public void run(){
+		try {
+		String fileID = getFileData(file);
+		FileInputStream stream = new FileInputStream(this.file);
+		Peer.getInstance().createHashMapEntry(fileID, replicationDeg);
+		boolean success = true;
+		String version = Peer.getInstance().getVersion();
+		String peerID = ((Integer) Peer.getInstance().getPeerID()).toString();
+
+		// reading from file this.chunkSize bytes at a time
+		for (int currentChunk = 0; currentChunk < this.chunkCount; currentChunk++) {
+			int resendCounter = 0;
+			while (resendCounter < 5) {
+				byte[] currentData = new byte[this.chunkSize]; // reading from file
+				stream.read(currentData);
+				byte[] currentHeader = Message.createPutchunkHeader(version, peerID, fileID, currentChunk, this.replicationDeg); // creating header
+
+				ByteArrayOutputStream outputStream = new ByteArrayOutputStream(currentHeader.length + this.chunkSize);
+				outputStream.write(currentHeader);
+				outputStream.write(currentData);
+				byte[] message = outputStream.toByteArray(); // concatenating the two arrays
+				outputStream.close();
+
+				DatagramPacket packet = new DatagramPacket(message, message.length);
+				mdbSocket.send(packet);
+				long timeout = (long) (1000 * Math.pow(2, resendCounter));
+				Thread.sleep(timeout);
+				if (Peer.getInstance().getFileStores().contains(fileID)
+						&& Peer.getInstance().getFileStores().get(fileID).peers.containsKey(currentChunk)) {
+					if (Peer.getInstance().getFileStores().get(fileID).peers.get(currentChunk)
+							.size() >= this.replicationDeg)
+						break;
+				}
+				resendCounter++;
+			}
+			if (resendCounter == 5)
+				success = false;
+		}}catch(Exception e) {
+			return;
+		}
+		
 	}
 
 }

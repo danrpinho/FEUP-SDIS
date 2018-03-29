@@ -8,6 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import peer.ChunkStoreRecord;
 import peer.Peer;
+import utils.Utils;
 
 public class ThreadMC extends MulticastThread {
 
@@ -21,7 +22,7 @@ public class ThreadMC extends MulticastThread {
 			try {
 				DatagramPacket packet = receivePacket(512);				
 				String data = new String(packet.getData(), "UTF-8");
-				String firstWord = getFirstWord(data);
+				String firstWord = Utils.getFirstWord(data);
 				switch(firstWord) {
 					case "STORED":
 						processStored(packet);
