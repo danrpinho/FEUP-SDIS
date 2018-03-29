@@ -20,6 +20,11 @@ public class Client {
 		if(!validArgs(args))
 			return;
 		
+		if(initRMI(args[0]) == false) {
+			ClientCommands.printUsage();
+			return;
+		}
+		
 		System.out.println("success");
 		if(args[1].equals(ClientCommands.BACKUP)) {
 			System.out.println("we are going to call BACKUP");
@@ -43,16 +48,13 @@ public class Client {
 	}
 	
 	private static boolean validArgs(String[] args) {
-		if(args.length < 2) {
+		if(args.length < 2) 
 			ClientCommands.printUsage();
-		}
+		
 		
 		boolean retValue = true;
 		
-		if(initRMI(args[0]) == false) {
-			ClientCommands.printUsage();
-			return false;
-		}
+		
 			
 		
 		if(args[1].equals(ClientCommands.BACKUP)) {
@@ -61,7 +63,7 @@ public class Client {
 			if(args.length != ClientCommands.BACKUP_NoArgs) { 
 				retValue = false;		
 			}
-			else if((file=Utils.validFilePath(args[2])) != null) {
+			else if((file=Utils.validFilePath(args[2])) == null) {
 				System.out.println("The filePath is not valid");
 				retValue = false;
 			}						

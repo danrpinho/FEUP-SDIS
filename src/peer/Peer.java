@@ -128,7 +128,8 @@ public class Peer implements RMIInterface{
 			new Backup(file, repDegree).run();
 		}
 		catch(Exception e) {
-			System.out.println("Exception caught ");
+			System.err.println("Backup exception: "+e.toString());
+			e.printStackTrace();
 		}
 		
 	}
