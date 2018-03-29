@@ -6,12 +6,36 @@ import java.net.MulticastSocket;
 import java.security.NoSuchAlgorithmException;
 
 import peer.Message;
+import peer.Peer;
 
 public class Restore implements Runnable {
+	
+	protected File file;
+	final protected int chunkSize = 64000;
+	
+	private int chunkCount;
+	private int replicationDeg;
+	private MulticastSocket mdbSocket = null;
+	private MulticastSocket mcSocket = null;
 
-//	public Restore() {
-//	}
+
+	public Restore() {
+		this.chunkCount = (int) Math.ceil(file.length() / (double) this.chunkSize);
+		if (file.length() % this.chunkSize == 0)
+			this.chunkCount++;
+	}
 	public void run() {
+		try {
+			String fileID = Message.getFileData(file);
+			String version = Peer.getInstance().getVersion();
+			String peerID = ((Integer) Peer.getInstance().getPeerID()).toString();
+			for (int chunkNo = 0; chunkNo < chunkCount; chunkNo++) {
+				byte[] data = Message.createGetchunkHeader(version, peerID, fileID, chunkNo);
+				
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		
 	}
 
