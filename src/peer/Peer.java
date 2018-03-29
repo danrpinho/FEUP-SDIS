@@ -55,7 +55,7 @@ public class Peer implements RMIInterface{
 		if(initRMI(accessPoint) == false) {
 			return;
 		}
-		
+		System.out.println(MCPort);
 		setMCThread(new ThreadMC(args[3], MCPort));
 		MDRThread = new ThreadMDR(args[5], MDRPort);
 		MDBThread = new ThreadMDB(args[7], MDBPort);
@@ -75,15 +75,15 @@ public class Peer implements RMIInterface{
 			System.out.println("<Peer_ID> must be an integer greater than 0");
 			retValue = false;
 		}
-		else if((MCPort=Utils.validInt(args[1])) <= 0) {
+		else if((MCPort=Utils.validInt(args[4])) <= 0) {
 			System.out.println("<MC_Port> must be an integer");
 			retValue = false;
 		}
-		else if((MDRPort=Utils.validInt(args[1])) <= 0) {
+		else if((MDRPort=Utils.validInt(args[6])) <= 0) {
 			System.out.println("<MDR_Port> must be an integer");
 			retValue = false;
 		}
-		else if((MDBPort=Utils.validInt(args[1])) <= 0) {
+		else if((MDBPort=Utils.validInt(args[8])) <= 0) {
 			System.out.println("<MDB_Port> must be an integer");
 			retValue = false;
 		}				

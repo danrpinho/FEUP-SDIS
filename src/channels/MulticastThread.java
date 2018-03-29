@@ -15,6 +15,7 @@ public abstract class MulticastThread implements Runnable {
 	MulticastThread(String address, int port) throws IOException{
 		this.address = InetAddress.getByName(address);
 		this.port = port;
+		System.out.println(this.port);
 		this.socket = new MulticastSocket(this.port);
 		this.socket.joinGroup(this.address);
 	}

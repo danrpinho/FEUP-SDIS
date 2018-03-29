@@ -20,8 +20,6 @@ public final class Utils {
 			int integer = -1;
 		try {
 			integer = Integer.parseInt(s_integer);
-			System.out.print("validInt");
-			System.out.println(integer);
 		}catch(NumberFormatException e) {
 			return -1;
 		}
