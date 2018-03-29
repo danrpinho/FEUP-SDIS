@@ -21,23 +21,20 @@ public class Client {
 			return;
 		
 		System.out.println("success");
-		switch(args[0]) {
-		case ClientCommands.BACKUP:
+		if(args[1].equals(ClientCommands.BACKUP)) {
+			System.out.println("we are going to call BACKUP");
 			rmiStub.backup(file, repDegree);
-			break;
-		case ClientCommands.RESTORE:
-			rmiStub.restore(args[2]);
-			break;
-		case ClientCommands.DELETE:
-			rmiStub.delete(args[2]);
-			break;
-		case ClientCommands.RECLAIM:
-			rmiStub.reclaim(space);
-			break;
-		case ClientCommands.STATE:
-			rmiStub.state();
-		
 		}
+		else if(args[1].equals(ClientCommands.RESTORE))
+			rmiStub.restore(args[2]);
+		else if(args[1].equals(ClientCommands.DELETE))
+			rmiStub.restore(args[2]);
+		else if(args[1].equals(ClientCommands.RECLAIM))
+			rmiStub.restore(args[2]);
+		else if(args[1].equals(ClientCommands.STATE))
+			rmiStub.restore(args[2]);
+		
+		
 	}
 
 	private static void showMainMenu() {
@@ -138,8 +135,9 @@ public class Client {
 	
 	private static boolean initRMI(String accessPoint) {
 		try {
-			Registry registry = LocateRegistry.getRegistry(null);
-			RMIInterface rmiStub = (RMIInterface) registry.lookup(accessPoint);
+			String host = null;
+			Registry registry = LocateRegistry.getRegistry(host);
+			rmiStub = (RMIInterface) registry.lookup(accessPoint);
 			
 		}catch(Exception e) {
 			System.err.println("RMI exception: "+e.toString());			
