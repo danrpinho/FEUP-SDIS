@@ -102,12 +102,22 @@ public final class Message {
 		
 		int firstIndexOfCR = message.indexOf(CR);
 		String header = message.substring(0, firstIndexOfCR);
-		String body = "";
-		if(message.length() > firstIndexOfCR + 4)
-			body = " "+message.substring(firstIndexOfCR + 4);
-		
 		String headerWithoutRepeatedSpaces = header.replaceAll(" +"," ");
+		String [] headerArgs = headerWithoutRepeatedSpaces.split(" ");
+		String version = headerArgs[0];
+		String body = "";
+		if(version.equals("CHUNK") || version.equals("PUTCHUNK")) {
+			System.out.println("b1");
+			body = " "+message.substring(firstIndexOfCR + 4);
+		}
+		
+		
 		String messageWithoutCR = headerWithoutRepeatedSpaces + body;
+		System.out.print(body.length());
+		System.out.print("body: ");
+		System.out.println(body);
+		System.out.print("messageWithoutCR: ");
+		System.out.println(messageWithoutCR);
 		
 		String [] messageArgs = messageWithoutCR.split(" ");
 		return messageArgs;
