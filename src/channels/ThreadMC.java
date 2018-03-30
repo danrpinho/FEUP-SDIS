@@ -64,23 +64,25 @@ public class ThreadMC extends MulticastThread {
 		for(int i=0; i < arguments.length; i++)
 			System.out.println(arguments[i]);
 		
-		if (hashMap.contains(arguments[3])) {		//must contain entry if a STORED message was received
-			ChunkStoreRecord record = hashMap.get(arguments[3]);
-			if(record.peers.containsKey(chunkNo)) {
-				ArrayList<Integer> list = record.peers.get(chunkNo);
-				if(!list.contains(senderID)) {
-					list.add(senderID);
-					record.peers.put(chunkNo, list);
-				}
-			} else {
-				ArrayList<Integer> list = new ArrayList<Integer>();
-				list.add(senderID);
-				record.peers.put(chunkNo, list);
-			}
-			hashMap.put(arguments[3], record);
-		} else {
-			throw new NullPointerException();
-		}
+		Utils.addPeerToHashmap(arguments[3], chunkNo, senderID);
+		
+//		if (hashMap.contains(arguments[3])) {		//must contain entry if a STORED message was received
+//			ChunkStoreRecord record = hashMap.get(arguments[3]);
+//			if(record.peers.containsKey(chunkNo)) {
+//				ArrayList<Integer> list = record.peers.get(chunkNo);
+//				if(!list.contains(senderID)) {
+//					list.add(senderID);
+//					record.peers.put(chunkNo, list);
+//				}
+//			} else {
+//				ArrayList<Integer> list = new ArrayList<Integer>();
+//				list.add(senderID);
+//				record.peers.put(chunkNo, list);
+//			}
+//			hashMap.put(arguments[3], record);
+//		} else {
+//			throw new NullPointerException();
+//		}
 	}
 
 	

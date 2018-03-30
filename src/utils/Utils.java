@@ -4,9 +4,14 @@ import java.io.File;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.MulticastSocket;
+import java.util.ArrayList;
 import java.util.Random;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import peer.ChunkStoreRecord;
+import peer.Peer;
 
 public final class Utils {
 	
@@ -65,6 +70,53 @@ public final class Utils {
         return mtch.replaceAll(replace);
     }*/
 	
+	public static boolean peerStoredChunk(String fileID, Integer chunkNo, Integer peerID) {
+		if (checkChunkPeers(fileID, chunkNo) <= 0) {
+			return false;
+		} else {
+			ConcurrentHashMap<String, ChunkStoreRecord> hashmap = Peer.getInstance().getFileStores();
+			return hashmap.get(fileID).peers.get(chunkNo).contains(peerID);
+		}
+	}
 	
+	public static int checkChunkPeers(String fileID, Integer chunkNo) {
+		ConcurrentHashMap<String, ChunkStoreRecord> hashmap = Peer.getInstance().getFileStores();
+		if (hashmap.contains(fileID)) {
+			if (hashmap.get(fileID).peers.containsKey(chunkNo)) {
+				return hashmap.get(fileID).peers.get(chunkNo).size();
+			} else {
+				return -2;	//file exists in hashmap, but not the chunk
+			}
+		} else {	//file does not exist in hashmap
+			return -1;
+		}
+	}
+	
+	public static boolean addPeerToHashmap(String fileID, Integer chunkNo, Integer peerID) {
+		int chunkStatus = checkChunkPeers(fileID, chunkNo);
+		ConcurrentHashMap<String, ChunkStoreRecord> hashmap = Peer.getInstance().getFileStores();
+		ChunkStoreRecord record = new ChunkStoreRecord();
+		ArrayList<Integer> peers = new ArrayList<Integer>();
+		
+		switch(chunkStatus) {
+		case -1:	//new fileID
+			break;
+		case -2:	//new chunkNo
+			record = hashmap.get(fileID);
+			break;
+		default:	//chunkNo exists
+			record = hashmap.get(fileID);
+			peers = record.peers.get(chunkNo);
+			if(peers.contains(peerID))
+				return false;
+		}
+		
+		peers.add(peerID);	
+		record.peers.put(chunkNo, peers);
+		hashmap.put(fileID, record);
+		Peer.getInstance().setFileStores(hashmap);
+		
+		return true;
+	}
 
 }
