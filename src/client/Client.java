@@ -31,13 +31,13 @@ public class Client {
 			rmiStub.backup(file, repDegree);
 		}
 		else if(args[1].equals(ClientCommands.RESTORE))
-			rmiStub.restore(args[2]);
+			rmiStub.restore(file);
 		else if(args[1].equals(ClientCommands.DELETE))
-			rmiStub.restore(args[2]);
+			rmiStub.delete(file);
 		else if(args[1].equals(ClientCommands.RECLAIM))
-			rmiStub.restore(args[2]);
+			rmiStub.reclaim(space);
 		else if(args[1].equals(ClientCommands.STATE))
-			rmiStub.restore(args[2]);
+			rmiStub.state();
 		
 		
 	}
@@ -86,6 +86,10 @@ public class Client {
 			
 			if(args.length != ClientCommands.RESTORE_NoArgs)
 				retValue = false;
+			else if((file=Utils.validFilePath(args[2])) == null) {
+				System.out.println("The filePath is not valid");
+				retValue = false;
+			}	
 			
 			
 			if(retValue == false)
@@ -98,6 +102,10 @@ public class Client {
 			
 			if(args.length != ClientCommands.DELETE_NoArgs)
 				retValue = false;
+			else if((file=Utils.validFilePath(args[2])) == null) {
+				System.out.println("The filePath is not valid");
+				retValue = false;
+			}	
 			
 			if(retValue == false)
 				System.out.println(ClientCommands.DELETE_Usage);

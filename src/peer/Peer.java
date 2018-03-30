@@ -141,11 +141,11 @@ public class Peer implements RMIInterface{
 		
 	}
 	
-	public void restore(String filename) {
+	public void restore(File filename) {
 		
 	}
 	
-	public void delete(String filename) {
+	public void delete(File filename) {
 		
 	}
 	
