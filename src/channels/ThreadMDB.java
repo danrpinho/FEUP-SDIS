@@ -65,7 +65,7 @@ public class ThreadMDB extends MulticastThread {
 		Thread.sleep(timeout);
 		Peer.getInstance().getMCThread().socket.send(new DatagramPacket(confirmationData, confirmationData.length));
 		
-		// TODO resolver statics do Protocol.createStoredHeader
+		// TODO adicionar à hashtable se não estiver presente
 		return true;
 	}
 }

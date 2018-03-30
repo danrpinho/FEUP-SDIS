@@ -45,7 +45,9 @@ public class ThreadMC extends MulticastThread {
 	}
 	
 	private void processGetchunk(DatagramPacket packet) {
+		
 		// TODO processar pacote e ver se o chunk existe no peer
+		// TODO usar o DatagramSocket.setSoTimeout para fazer a verificacao do timeout
 		
 	}
 

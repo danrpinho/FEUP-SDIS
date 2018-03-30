@@ -2,6 +2,7 @@ package initiators;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.DatagramPacket;
 import java.net.MulticastSocket;
 import java.security.NoSuchAlgorithmException;
 
@@ -31,7 +32,10 @@ public class Restore implements Runnable {
 			String peerID = ((Integer) Peer.getInstance().getPeerID()).toString();
 			for (int chunkNo = 0; chunkNo < chunkCount; chunkNo++) {
 				byte[] data = Message.createGetchunkHeader(version, peerID, fileID, chunkNo);
+				DatagramPacket packet = new DatagramPacket(data, data.length);
+				mcSocket.send(packet);
 				
+				//TODO verificar se o chunk foi recebido
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
