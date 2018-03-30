@@ -71,7 +71,7 @@ public final class Utils {
         return mtch.replaceAll(replace);
     }*/
 	
-	public static boolean peerStoredChunk(String fileID, Integer chunkNo, Integer peerID) {
+	/*public static boolean peerStoredChunk(String fileID, Integer chunkNo, Integer peerID) {
 		if (checkChunkPeers(fileID, chunkNo) <= 0) {
 			return false;
 		} else {
@@ -118,7 +118,7 @@ public final class Utils {
 		Peer.setFileStores(hashmap);
 		
 		return true;
-	}
+	}*/
 	
 	public static void printHashMap(ConcurrentHashMap<String, ChunkStoreRecord> hash) {
 		System.out.println("Print HashMap: ");

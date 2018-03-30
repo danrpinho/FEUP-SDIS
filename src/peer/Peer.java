@@ -247,4 +247,55 @@ public class Peer implements RMIInterface{
 	public static InetAddress getMDRAddress() {
 		return mdrAddress;
 	}
+	
+	
+	
+	public static boolean peerStoredChunk(String fileID, Integer chunkNo, Integer peerID) {
+		if (checkChunkPeers(fileID, chunkNo) <= 0) {
+			return false;
+		} else {
+			ConcurrentHashMap<String, ChunkStoreRecord> hashmap = getFileStores();
+			return hashmap.get(fileID).peers.get(chunkNo).contains(peerID);
+		}
+	}
+	
+	public static int checkChunkPeers(String fileID, Integer chunkNo) {
+		ConcurrentHashMap<String, ChunkStoreRecord> hashmap = getFileStores();
+		if (hashmap.contains(fileID)) {
+			if (hashmap.get(fileID).peers.containsKey(chunkNo)) {
+				return hashmap.get(fileID).peers.get(chunkNo).size();
+			} else {
+				return -2;	//file exists in hashmap, but not the chunk
+			}
+		} else {	//file does not exist in hashmap
+			return -1;
+		}
+	}
+	
+	public static boolean addPeerToHashmap(String fileID, Integer chunkNo, Integer peerID) {
+		int chunkStatus = checkChunkPeers(fileID, chunkNo);
+		ConcurrentHashMap<String, ChunkStoreRecord> hashmap = getFileStores();
+		ChunkStoreRecord record = new ChunkStoreRecord();
+		ArrayList<Integer> peers = new ArrayList<Integer>();
+		
+		switch(chunkStatus) {
+		case -1:	//new fileID
+			break;
+		case -2:	//new chunkNo
+			record = hashmap.get(fileID);
+			break;
+		default:	//chunkNo exists
+			record = hashmap.get(fileID);
+			peers = record.peers.get(chunkNo);
+			if(peers.contains(peerID))
+				return false;
+		}
+		
+		peers.add(peerID);	
+		record.peers.put(chunkNo, peers);
+		hashmap.put(fileID, record);
+		Peer.setFileStores(hashmap);
+		
+		return true;
+	}
 }

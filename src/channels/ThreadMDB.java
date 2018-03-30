@@ -50,10 +50,10 @@ public class ThreadMDB extends MulticastThread {
 		byte[] chunk = packetData[1].getBytes();
 		String[] header = packetData[0].split(" ");
 		packetData = null;
-		if (header[2].equals(Integer.toString(Peer.getInstance().getPeerID()))) // avoids storing chunks
+		if (header[2].equals(Integer.toString(Peer.getPeerID()))) // avoids storing chunks
 			return false;
 		
-		int currentID = Peer.getInstance().getPeerID();
+		int currentID = Peer.getPeerID();
 		int chunkNo = Integer.parseInt(header[4]);
 		int replicationDeg = Integer.parseInt(header[5]);
 		
@@ -63,9 +63,9 @@ public class ThreadMDB extends MulticastThread {
 //			return true;
 //		}
 		
-		Utils.addPeerToHashmap(header[3], chunkNo, currentID);
+		Peer.addPeerToHashmap(header[3], chunkNo, currentID);
 				
-		String filename = header[2] + "-" + header[3] + "." + header[4] + ".chunk";
+		String filename = header[2] + "-" + header[3] + "." + header[4] + ".txt";
 		FileOutputStream out = new FileOutputStream(filename);
 		out.write(chunk);
 		out.close();
