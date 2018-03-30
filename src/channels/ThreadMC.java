@@ -22,7 +22,8 @@ public class ThreadMC extends MulticastThread {
 		while (true) {
 			try {
 				DatagramPacket packet = receivePacket(512);		
-				System.out.println("Thread MC: Packet received");
+				System.out.print("Thread MC: Packet received: ");
+				System.out.println(new String(packet.getData()));
 				String data = new String(packet.getData(), "UTF-8");
 				String firstWord = Utils.getFirstWord(data);
 				switch(firstWord) {

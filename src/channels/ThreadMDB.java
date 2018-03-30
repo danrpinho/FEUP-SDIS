@@ -31,7 +31,8 @@ public class ThreadMDB extends MulticastThread {
 		while(true) {
 			try {
 				DatagramPacket packet = receivePacket(64512);
-				System.out.println("MDB Thread Packet received");
+				System.out.print("MDB Thread Packet received: ");
+				System.out.println(new String(packet.getData()));
 				String firstWord = getFirstWord(new String(packet.getData(), "UTF-8"));
 				if (firstWord.equals("PUTCHUNK")) {
 					store(packet);

@@ -25,9 +25,9 @@ import java.rmi.server.UnicastRemoteObject;
 public class Peer implements RMIInterface{
 
 	protected static Peer instance;
-	protected static String version = null;
-	protected static int peerID;
-	protected static String accessPoint = null;
+	private static String version = null;
+	private static int peerID;
+	private static String accessPoint = null;
 	private static ThreadMC MCThread;
 	private static ThreadMDR MDRThread;
 	private static ThreadMDB MDBThread;
@@ -95,7 +95,7 @@ public class Peer implements RMIInterface{
 			retValue = false;
 		}				
 		else {
-			setPeerID(peerID);
+			version = args[0];
 			accessPoint = args[2];
 			mcAddress = InetAddress.getByName(args[3]);
 			mdrAddress = InetAddress.getByName(args[5]);
