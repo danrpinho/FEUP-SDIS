@@ -12,8 +12,8 @@ public abstract class MulticastThread implements Runnable {
 	protected InetAddress address;
 	protected MulticastSocket socket;
 	
-	MulticastThread(String address, int port) throws IOException{
-		this.address = InetAddress.getByName(address);
+	MulticastThread(InetAddress address, int port) throws IOException{
+		this.address = address;
 		this.port = port;
 		this.socket = new MulticastSocket(this.port);
 		this.socket.joinGroup(this.address);
@@ -50,6 +50,7 @@ public abstract class MulticastThread implements Runnable {
 
 	@Override
 	public void run() {
+		System.out.println("MulticastThread run");
 	}
 	
 	protected String getFirstWord(String data) {
@@ -60,7 +61,9 @@ public abstract class MulticastThread implements Runnable {
 	protected DatagramPacket receivePacket(int bufferSize) throws IOException {
 		byte[] rbuf = new byte[bufferSize];
 		DatagramPacket packet = new DatagramPacket(rbuf, rbuf.length);
+		System.out.println("packet received before");
 		socket.receive(packet);
+		System.out.println("packet received after");
 		return packet;
 	}
 

@@ -4,6 +4,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.DatagramPacket;
+import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.util.Random;
 
@@ -15,16 +16,22 @@ import utils.Utils;
 import java.util.Random;
 
 public class ThreadMDB extends MulticastThread {
+	
+	private MulticastSocket mcSocket = null;
 
-	public ThreadMDB(String address, int port) throws IOException {
+	public ThreadMDB(InetAddress address, int port) throws IOException {
 		super(address, port);
+		mcSocket = new MulticastSocket();
+		System.out.println("Thread MDB constructor");
 	}
 
 	@Override
 	public void run() {
+		System.out.println("Thread mdb run");
 		while(true) {
 			try {
 				DatagramPacket packet = receivePacket(64512);
+				System.out.println("MDB Thread Packet received");
 				String firstWord = getFirstWord(new String(packet.getData(), "UTF-8"));
 				if (firstWord.equals("PUTCHUNK")) {
 					store(packet);
@@ -63,7 +70,8 @@ public class ThreadMDB extends MulticastThread {
 		byte[] confirmationData = Message.createStoredHeader(header[1], Integer.toString(currentID), header[3], chunkNo);
 		long timeout  = (long) Utils.generateRandomInteger(0, 400);
 		Thread.sleep(timeout);
-		Peer.getInstance().getMCThread().socket.send(new DatagramPacket(confirmationData, confirmationData.length));
+		System.out.println("Stored message sent");
+		mcSocket.send(new DatagramPacket(confirmationData, confirmationData.length,Peer.getMCAddress(), Peer.getMCPort()));
 		
 		// TODO resolver statics do Protocol.createStoredHeader
 		return true;

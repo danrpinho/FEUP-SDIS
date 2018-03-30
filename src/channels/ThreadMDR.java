@@ -1,10 +1,11 @@
 package channels;
 
 import java.io.IOException;
+import java.net.InetAddress;
 
 public class ThreadMDR extends MulticastThread {
 
-	public ThreadMDR(String address, int port) throws IOException {
+	public ThreadMDR(InetAddress address, int port) throws IOException {
 		super(address, port);
 	}
 	

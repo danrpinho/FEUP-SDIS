@@ -3,6 +3,7 @@ package channels;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.DatagramPacket;
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -12,7 +13,7 @@ import utils.Utils;
 
 public class ThreadMC extends MulticastThread {
 
-	public ThreadMC(String address, int port) throws IOException {
+	public ThreadMC(InetAddress address, int port) throws IOException {
 		super(address, port);
 	}
 	
@@ -20,7 +21,8 @@ public class ThreadMC extends MulticastThread {
 	public void run() {
 		while (true) {
 			try {
-				DatagramPacket packet = receivePacket(512);				
+				DatagramPacket packet = receivePacket(512);		
+				System.out.println("Thread MC: Packet received");
 				String data = new String(packet.getData(), "UTF-8");
 				String firstWord = Utils.getFirstWord(data);
 				switch(firstWord) {

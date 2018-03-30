@@ -54,7 +54,7 @@ public class Backup implements Runnable {
 			if (file.length() % this.chunkSize == 0)
 				this.chunkCount++;
 			
-			mdbSocket = new MulticastSocket(Peer.getMDBPort());
+			mdbSocket = new MulticastSocket();
 		/*}*/
 	}
 
@@ -132,8 +132,10 @@ public class Backup implements Runnable {
 				byte[] message = outputStream.toByteArray(); // concatenating the two arrays
 				outputStream.close();
 
-				DatagramPacket packet = new DatagramPacket(message, message.length);
+				DatagramPacket packet = new DatagramPacket(message, message.length, Peer.getMDBAddress(), Peer.getMDBPort());
+				System.out.println("Backup Packet sent before");
 				mdbSocket.send(packet);
+				System.out.println("Backup Packet sent after");
 				long timeout = (long) (1000 * Math.pow(2, resendCounter));
 				Thread.sleep(timeout);
 				if (Peer.getInstance().getFileStores().contains(fileID)

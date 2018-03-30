@@ -34,6 +34,9 @@ public class Peer implements RMIInterface{
 	private static int mcPort;
 	private static int mdrPort;
 	private static int mdbPort;
+	private static InetAddress mcAddress;
+	private static InetAddress mdrAddress;
+	private static InetAddress mdbAddress;
 	
 	
 	protected static ConcurrentHashMap<String, ChunkStoreRecord> fileStores = new ConcurrentHashMap<String, ChunkStoreRecord>();
@@ -60,16 +63,16 @@ public class Peer implements RMIInterface{
 		
 		
 		
-		MCThread = new ThreadMC(args[3], mcPort);
-		MDRThread = new ThreadMDR(args[5], mdrPort);
-		MDBThread = new ThreadMDB(args[7], mdbPort);
+		MCThread = new ThreadMC(mcAddress, mcPort);
+		MDRThread = new ThreadMDR(mdrAddress, mdrPort);
+		MDBThread = new ThreadMDB(mdbAddress, mdbPort);
 		
 		launchThreads();
 		
 		
 	}
 	
-	public static boolean validArgs(String[] args) {
+	public static boolean validArgs(String[] args) throws UnknownHostException {
 		boolean retValue = true;
 		if(args.length != PeerCommands.PEER_NoArgs) 
 			retValue = false;
@@ -94,11 +97,15 @@ public class Peer implements RMIInterface{
 		else {
 			setPeerID(peerID);
 			accessPoint = args[2];
+			mcAddress = InetAddress.getByName(args[3]);
+			mdrAddress = InetAddress.getByName(args[5]);
+			mdbAddress = InetAddress.getByName(args[7]);
 		}
 		
 		
 		if(retValue == false)
 			PeerCommands.printUsage();
+		
 		
 		return retValue;
 		
@@ -151,13 +158,16 @@ public class Peer implements RMIInterface{
 	}
 	
 	private static void launchThreads() {
-		getMCThread().run();
-		MDRThread.run();
-		MDBThread.run();
+		
+		System.out.println("Launch threads");
+		(new Thread(MCThread)).start();
+		(new Thread(MDRThread)).start();
+		(new Thread(MDBThread)).start();
 	}
 
 	private static void closeThreads() throws IOException {
-		getMCThread().close();
+
+		MCThread.close();
 		MDRThread.close();
 		MDBThread.close();
 	}
@@ -200,34 +210,41 @@ public class Peer implements RMIInterface{
 	}
 	
 	
-	/*public static boolean createSockets() {
-		try {
-			MCSocket = new MulticastSocket(MCPort);
-			MDBSocket = new MulticastSocket(MDBPort);
-			MDRSocket = new MulticastSocket(MDRPort);
-			
-		}catch(Exception e) {
-			System.out.println("Could not initialize sockets");
-			return false;
-		}
-		return true;
-	}*/
-	
 	/**
 	 * @return the mCThread
 	 */
-	public static ThreadMC getMCThread() {
+	/*public static ThreadMC getMCThread() {
 		return MCThread;
-	}
+	}*/
 
 	/**
 	 * @param mCThread the mCThread to set
 	 */
-	public static void setMCThread(ThreadMC mCThread) {
+	/*public static void setMCThread(ThreadMC mCThread) {
 		MCThread = mCThread;
+	}*/
+	
+	public static int getMCPort() {
+		return mcPort;
 	}
 	
 	public static int getMDBPort() {
 		return mdbPort;
+	}
+	
+	public static int getMDRPort() {
+		return mdrPort;
+	}
+	
+	public static InetAddress getMCAddress() {
+		return mcAddress;
+	}
+	
+	public static InetAddress getMDBAddress() {
+		return mdbAddress;
+	}
+	
+	public static InetAddress getMDRAddress() {
+		return mdrAddress;
 	}
 }
