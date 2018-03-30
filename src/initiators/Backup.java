@@ -115,8 +115,8 @@ public class Backup implements Runnable {
 		FileInputStream stream = new FileInputStream(this.file);
 		Peer.getInstance().createHashMapEntry(fileID, replicationDeg);
 		boolean success = true;
-		String version = Peer.getInstance().getVersion();
-		String peerID = ((Integer) Peer.getInstance().getPeerID()).toString();
+		String version = Peer.getVersion();
+		String peerID = ((Integer) Peer.getPeerID()).toString();
 
 		// reading from file this.chunkSize bytes at a time
 		for (int currentChunk = 0; currentChunk < this.chunkCount; currentChunk++) {
@@ -138,9 +138,9 @@ public class Backup implements Runnable {
 				System.out.println("Backup Packet sent after");
 				long timeout = (long) (1000 * Math.pow(2, resendCounter));
 				Thread.sleep(timeout);
-				if (Peer.getInstance().getFileStores().contains(fileID)
-						&& Peer.getInstance().getFileStores().get(fileID).peers.containsKey(currentChunk)) {
-					if (Peer.getInstance().getFileStores().get(fileID).peers.get(currentChunk)
+				if (Peer.getFileStores().contains(fileID)
+						&& Peer.getFileStores().get(fileID).peers.containsKey(currentChunk)) {
+					if (Peer.getFileStores().get(fileID).peers.get(currentChunk)
 							.size() >= this.replicationDeg)
 						break;
 				}

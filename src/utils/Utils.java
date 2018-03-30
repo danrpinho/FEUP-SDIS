@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.MulticastSocket;
 import java.util.Random;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public final class Utils {
 	
@@ -55,6 +57,13 @@ public final class Utils {
 		int randomNum = rand.nextInt((max - min) + 1) + min;
 		return randomNum;
 	}
+	
+	/*public String replaceWithPattern(String str,String replace){
+        
+        Pattern ptn = Pattern.compile("\\s+");
+        Matcher mtch = ptn.matcher(str);
+        return mtch.replaceAll(replace);
+    }*/
 	
 	
 

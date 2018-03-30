@@ -97,5 +97,20 @@ public final class Message {
 		String hashedData = Utils.encodeByteArray(initialData);
 		return hashedData;
 	}
+	
+	public static String[] splitMessage(String message) {
+		
+		int firstIndexOfCR = message.indexOf(CR);
+		String header = message.substring(0, firstIndexOfCR);
+		String body = "";
+		if(message.length() > firstIndexOfCR + 4)
+			body = " "+message.substring(firstIndexOfCR + 4);
+		
+		String headerWithoutRepeatedSpaces = header.replaceAll(" +"," ");
+		String messageWithoutCR = headerWithoutRepeatedSpaces + body;
+		
+		String [] messageArgs = messageWithoutCR.split(" ");
+		return messageArgs;
+	}
 
 }

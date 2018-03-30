@@ -172,7 +172,7 @@ public class Peer implements RMIInterface{
 		MDBThread.close();
 	}
 
-	public ConcurrentHashMap<String, ChunkStoreRecord> getFileStores() {
+	public static ConcurrentHashMap<String, ChunkStoreRecord> getFileStores() {
 		return fileStores;
 	}
 

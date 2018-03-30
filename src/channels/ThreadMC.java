@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 
 import peer.ChunkStoreRecord;
+import peer.Message;
 import peer.Peer;
 import utils.Utils;
 
@@ -55,10 +56,14 @@ public class ThreadMC extends MulticastThread {
 	}
 
 	protected void processStored(DatagramPacket packet) throws UnsupportedEncodingException {
-		String[] arguments = new String(packet.getData(), "UTF-8").split(" ");
-		ConcurrentHashMap<String,ChunkStoreRecord> hashMap = Peer.getInstance().getFileStores();
+		String[] arguments = Message.splitMessage(new String(packet.getData()));
+		ConcurrentHashMap<String,ChunkStoreRecord> hashMap = Peer.getFileStores();
 		Integer chunkNo = Integer.parseInt(arguments[4]);
 		Integer senderID = Integer.parseInt(arguments[2]);
+		System.out.println(arguments.length);
+		for(int i=0; i < arguments.length; i++)
+			System.out.println(arguments[i]);
+		
 		if (hashMap.contains(arguments[3])) {		//must contain entry if a STORED message was received
 			ChunkStoreRecord record = hashMap.get(arguments[3]);
 			if(record.peers.containsKey(chunkNo)) {
