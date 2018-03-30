@@ -30,6 +30,7 @@ public class ThreadMC extends MulticastThread {
 						processStored(packet);
 						break;
 					case "GETCHUNK":
+						processGetchunk(packet);
 						break;
 					case "DELETE":
 						break;
@@ -45,6 +46,13 @@ public class ThreadMC extends MulticastThread {
 		}
 	}
 	
+	private void processGetchunk(DatagramPacket packet) {
+		
+		// TODO processar pacote e ver se o chunk existe no peer
+		// TODO usar o DatagramSocket.setSoTimeout para fazer a verificacao do timeout
+		
+	}
+
 	protected void processStored(DatagramPacket packet) throws UnsupportedEncodingException {
 		String[] arguments = new String(packet.getData(), "UTF-8").split(" ");
 		ConcurrentHashMap<String,ChunkStoreRecord> hashMap = Peer.getInstance().getFileStores();

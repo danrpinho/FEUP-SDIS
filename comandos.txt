@@ -2,7 +2,7 @@
 Comando para compilar (deve ser corrido dentro da pasta src):
 javac -d destDir channels/*.java client/*.java initiators/*.java peer/*.java rmi/*.java utils/*.java 
 
-Comando para testar um peer (deve ser corrido dentro da pasta destDir):
+Comando para iniciar a RMI (deve ser corrido dentro da pasta destDir):
 rmiregistry &
 
 Comando para testar um peer (deve ser corrido dentro da pasta src):

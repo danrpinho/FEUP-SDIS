@@ -73,7 +73,7 @@ public class ThreadMDB extends MulticastThread {
 		System.out.println("Stored message sent");
 		mcSocket.send(new DatagramPacket(confirmationData, confirmationData.length,Peer.getMCAddress(), Peer.getMCPort()));
 		
-		// TODO resolver statics do Protocol.createStoredHeader
+		// TODO adicionar à hashtable se não estiver presente
 		return true;
 	}
 }
