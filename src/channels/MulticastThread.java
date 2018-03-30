@@ -61,9 +61,9 @@ public abstract class MulticastThread implements Runnable {
 	protected DatagramPacket receivePacket(int bufferSize) throws IOException {
 		byte[] rbuf = new byte[bufferSize];
 		DatagramPacket packet = new DatagramPacket(rbuf, rbuf.length);
-		System.out.println("packet received before");
+		//System.out.println("packet received before");
 		socket.receive(packet);
-		System.out.println("packet received after");
+		//System.out.println("packet received after");
 		return packet;
 	}
 

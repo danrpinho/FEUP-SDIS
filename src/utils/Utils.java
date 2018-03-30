@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.MulticastSocket;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
@@ -74,13 +75,13 @@ public final class Utils {
 		if (checkChunkPeers(fileID, chunkNo) <= 0) {
 			return false;
 		} else {
-			ConcurrentHashMap<String, ChunkStoreRecord> hashmap = Peer.getInstance().getFileStores();
+			ConcurrentHashMap<String, ChunkStoreRecord> hashmap = Peer.getFileStores();
 			return hashmap.get(fileID).peers.get(chunkNo).contains(peerID);
 		}
 	}
 	
 	public static int checkChunkPeers(String fileID, Integer chunkNo) {
-		ConcurrentHashMap<String, ChunkStoreRecord> hashmap = Peer.getInstance().getFileStores();
+		ConcurrentHashMap<String, ChunkStoreRecord> hashmap = Peer.getFileStores();
 		if (hashmap.contains(fileID)) {
 			if (hashmap.get(fileID).peers.containsKey(chunkNo)) {
 				return hashmap.get(fileID).peers.get(chunkNo).size();
@@ -94,7 +95,7 @@ public final class Utils {
 	
 	public static boolean addPeerToHashmap(String fileID, Integer chunkNo, Integer peerID) {
 		int chunkStatus = checkChunkPeers(fileID, chunkNo);
-		ConcurrentHashMap<String, ChunkStoreRecord> hashmap = Peer.getInstance().getFileStores();
+		ConcurrentHashMap<String, ChunkStoreRecord> hashmap = Peer.getFileStores();
 		ChunkStoreRecord record = new ChunkStoreRecord();
 		ArrayList<Integer> peers = new ArrayList<Integer>();
 		
@@ -114,9 +115,35 @@ public final class Utils {
 		peers.add(peerID);	
 		record.peers.put(chunkNo, peers);
 		hashmap.put(fileID, record);
-		Peer.getInstance().setFileStores(hashmap);
+		Peer.setFileStores(hashmap);
 		
 		return true;
 	}
+	
+	public static void printHashMap(ConcurrentHashMap<String, ChunkStoreRecord> hash) {
+		System.out.println("Print HashMap: ");
+		for (String name: hash.keySet()){
+
+            
+            String value = hash.get(name).toString(); 
+            System.out.print(name);  
+            System.out.println(": ");
+            
+            HashMap<Integer,ArrayList<Integer>> hash2 = hash.get(name).peers;
+            
+            
+            
+            for(int name2: hash2.keySet()) {
+            	ArrayList<Integer> arr = hash2.get(name2);
+            	System.out.print(name2);System.out.print(" { ");
+            	for(int i : arr) {
+            		System.out.print(i); System.out.print(" ");
+            	}
+            	System.out.println("}");
+            }
+           
+         }
+	}
+
 
 }

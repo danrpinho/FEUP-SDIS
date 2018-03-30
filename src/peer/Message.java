@@ -107,17 +107,17 @@ public final class Message {
 		String version = headerArgs[0];
 		String body = "";
 		if(version.equals("CHUNK") || version.equals("PUTCHUNK")) {
-			System.out.println("b1");
+			//System.out.println("b1");
 			body = " "+message.substring(firstIndexOfCR + 4);
 		}
 		
 		
 		String messageWithoutCR = headerWithoutRepeatedSpaces + body;
-		System.out.print(body.length());
+		/*System.out.print(body.length());
 		System.out.print("body: ");
 		System.out.println(body);
 		System.out.print("messageWithoutCR: ");
-		System.out.println(messageWithoutCR);
+		System.out.println(messageWithoutCR);*/
 		
 		String [] messageArgs = messageWithoutCR.split(" ");
 		return messageArgs;

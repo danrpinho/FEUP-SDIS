@@ -13,8 +13,11 @@ import java.nio.file.LinkOption;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 
+import peer.ChunkStoreRecord;
 import peer.Message;
 import peer.Peer;
 import utils.Utils;
@@ -138,7 +141,12 @@ public class Backup implements Runnable {
 				System.out.println("Backup Packet sent after");
 				long timeout = (long) (1000 * Math.pow(2, resendCounter));
 				Thread.sleep(timeout);
-				if (Peer.getFileStores().contains(fileID)
+				/*Utils.printHashMap(Peer.getFileStores());
+				System.out.print("current chunk: ");
+				System.out.println(currentChunk);
+				System.out.println(Peer.getFileStores().containsKey(fileID));
+				System.out.println(Peer.getFileStores().get(fileID).peers.containsKey(currentChunk));*/
+				if (Peer.getFileStores().containsKey(fileID)
 						&& Peer.getFileStores().get(fileID).peers.containsKey(currentChunk)) {
 					if (Peer.getFileStores().get(fileID).peers.get(currentChunk)
 							.size() >= this.replicationDeg)
@@ -155,5 +163,10 @@ public class Backup implements Runnable {
 		}
 		
 	}
+	
+	
+
+ 
+
 
 }

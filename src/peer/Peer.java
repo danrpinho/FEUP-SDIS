@@ -39,7 +39,7 @@ public class Peer implements RMIInterface{
 	private static InetAddress mdbAddress;
 	
 	
-	protected static ConcurrentHashMap<String, ChunkStoreRecord> fileStores = new ConcurrentHashMap<String, ChunkStoreRecord>();
+	private static ConcurrentHashMap<String, ChunkStoreRecord> fileStores = new ConcurrentHashMap<String, ChunkStoreRecord>();
 
 	public static Peer getInstance() {
 		if (instance == null) {
