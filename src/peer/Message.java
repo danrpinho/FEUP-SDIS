@@ -103,9 +103,9 @@ public final class Message {
 	public static String[] splitMessage(String message) {
 		
 		int firstIndexOfCR = message.indexOf(CR);
-		System.out.println(message);
+		/*System.out.println(message);
 		System.out.println(message.length());
-		System.out.println(firstIndexOfCR);
+		System.out.println(firstIndexOfCR);*/
 		String header = message.substring(0, firstIndexOfCR);
 		String headerWithoutRepeatedSpaces = header.replaceAll(" +"," ");
 		String [] headerArgs = headerWithoutRepeatedSpaces.split(" ");
