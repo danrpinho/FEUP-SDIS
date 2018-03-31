@@ -144,6 +144,7 @@ public class Backup implements Runnable {
 				System.out.println(Peer.getFileStores().get(fileID).peers.containsKey(currentChunk));*/
 				if (Peer.getFileStores().containsKey(fileID)
 						&& Peer.getFileStores().get(fileID).peers.containsKey(currentChunk)) {
+					System.out.println(Peer.getFileStores().get(fileID).peers.get(currentChunk).size());
 					if (Peer.getFileStores().get(fileID).peers.get(currentChunk)
 							.size() >= this.replicationDeg)
 						break;
