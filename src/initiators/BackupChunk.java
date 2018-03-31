@@ -5,7 +5,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.MulticastSocket;
-import java.util.stream.Stream;
 
 import peer.Message;
 import peer.Peer;
@@ -15,7 +14,7 @@ public class BackupChunk implements Runnable {
 	private String fileID = null;
 	private FileInputStream stream = null;
 	private int currentChunk;
-	private final int chunkSize = 64000;
+	private final int chunkSize = 640;
 	private int replicationDeg;
 	private MulticastSocket mdbSocket = null;
 	
@@ -33,7 +32,7 @@ public class BackupChunk implements Runnable {
 		while (resendCounter < 5) {
 			try {
 			byte[] currentData = new byte[this.chunkSize]; // reading from file
-			stream.read(currentData);
+			stream.read(currentData, this.currentChunk * this.chunkSize, this.chunkSize);
 			byte[] currentHeader = Message.createPutchunkHeader(Peer.getVersion(), ((Integer) Peer.getPeerID()).toString(), fileID, currentChunk, this.replicationDeg); // creating header
 
 			ByteArrayOutputStream outputStream = new ByteArrayOutputStream(currentHeader.length + this.chunkSize);

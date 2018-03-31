@@ -67,7 +67,6 @@ public class Backup implements Runnable {
 		if (type == ProtocolType.BACKUP) {
 			throw new IllegalArgumentException("Protocol requires replication degree and file path!");
 		}
-
 	}*/
 
 	/*public void run(MulticastSocket mdbSocket) throws IOException, NoSuchAlgorithmException, InterruptedException {
@@ -77,7 +76,6 @@ public class Backup implements Runnable {
 		boolean success = true;
 		String version = Peer.getInstance().getVersion();
 		String peerID = ((Integer) Peer.getInstance().getPeerID()).toString();
-
 		// reading from file this.chunkSize bytes at a time
 		for (int currentChunk = 0; currentChunk < this.chunkCount; currentChunk++) {
 			int resendCounter = 0;
@@ -85,13 +83,11 @@ public class Backup implements Runnable {
 				byte[] currentData = new byte[this.chunkSize]; // reading from file
 				stream.read(currentData);
 				byte[] currentHeader = Message.createPutchunkHeader(version, peerID, fileID, currentChunk, this.replicationDeg); // creating header
-
 				ByteArrayOutputStream outputStream = new ByteArrayOutputStream(currentHeader.length + this.chunkSize);
 				outputStream.write(currentHeader);
 				outputStream.write(currentData);
 				byte[] message = outputStream.toByteArray(); // concatenating the two arrays
 				outputStream.close();
-
 				DatagramPacket packet = new DatagramPacket(message, message.length);
 				mdbSocket.send(packet);
 				long timeout = (long) (1000 * Math.pow(2, resendCounter));
@@ -170,3 +166,9 @@ public class Backup implements Runnable {
 
 
 }
+	
+
+ 
+
+
+
