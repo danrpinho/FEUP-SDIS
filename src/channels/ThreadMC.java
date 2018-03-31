@@ -35,6 +35,7 @@ public class ThreadMC extends MulticastThread {
 						processGetchunk(packet);
 						break;
 					case "DELETE":
+						processDelete(packet);
 						break;
 					case "REMOVED":
 						break;
@@ -83,6 +84,14 @@ public class ThreadMC extends MulticastThread {
 //		} else {
 //			throw new NullPointerException();
 //		}
+	}
+	
+	private void processDelete(DatagramPacket packet) {
+		String[] arguments = Message.splitMessage((new String(packet.getData())));
+		String fileID = arguments[3];
+		Integer senderID = Integer.parseInt(arguments[2]);
+		if(senderID != Peer.getPeerID())
+			Peer.deleteFile(fileID);
 	}
 
 	

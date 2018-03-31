@@ -146,10 +146,7 @@ public final class Utils {
 	
 	public static void printChunksInPeer(ConcurrentHashMap<String, ArrayList<Integer> > hash) {
 		System.out.println("Print HashMap: ");
-		for (String name: hash.keySet()){
-
-            
-            
+		for (String name: hash.keySet()){                  
            
             	ArrayList<Integer> arr = hash.get(name);
             	System.out.print(name);System.out.print(" { ");

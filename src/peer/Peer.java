@@ -13,6 +13,7 @@ import channels.ThreadMC;
 import channels.ThreadMDB;
 import channels.ThreadMDR;
 import initiators.Backup;
+import initiators.Delete;
 import rmi.RMIInterface;
 import utils.Utils;
 
@@ -141,7 +142,7 @@ public class Peer implements RMIInterface{
 	public void backup(File file, int repDegree) {
 		System.out.println("Backup function called");
 		try {
-			new Backup(file, repDegree).run();
+			new Thread(new Backup(file, repDegree)).start();
 		}
 		catch(Exception e) {
 			System.err.println("Backup exception: "+e.toString());
@@ -150,12 +151,12 @@ public class Peer implements RMIInterface{
 		
 	}
 	
-	public void restore(File filename) {
+	public void restore(File file) {
 		
 	}
 	
-	public void delete(File filename) {
-		
+	public void delete(File file) {
+		new Thread(new Delete(file)).start();
 	}
 	
 	public void reclaim(int space) {
@@ -370,6 +371,33 @@ public class Peer implements RMIInterface{
 			chunksInPeer.put(fileID, chunks);
 		}
 		
+	}
+	
+	public static void deleteFile(String fileID) {
+		if(chunksInPeer.containsKey(fileID)) {
+			ArrayList<Integer> chunks = chunksInPeer.get(fileID);
+			Iterator<Integer> itr =chunks.iterator();
+			while(itr.hasNext()) {
+				Integer i = (Integer) itr.next();
+				System.out.println(i);
+				File file = new File(((Integer) peerID).toString()+"-"+fileID+"."+i.toString()+".chunk");
+				if(file.exists())
+					System.out.println("File exists");
+				else
+					System.out.println(((Integer) peerID).toString()+"-"+fileID+"."+i.toString()+".chunk");
+				if(file.delete()) {
+					System.out.println("Deleted file "+fileID);
+					itr.remove();
+				}
+				else
+					System.out.println("Failed to delete file "+fileID);
+			}
+			if(chunks.isEmpty())
+				chunksInPeer.remove(fileID);
+		}
+		
+		Peer.writeChunksInPeer();
+	
 	}
 	
 	

@@ -42,6 +42,8 @@ public final class Message {
 				secondPart = " " + chunkNo + " " + replicationDeg;
 			res = res + secondPart + Message.endHeader;
 		}
+		else
+			res = res+Message.endHeader;
 		return res.getBytes();
 	}
 	
@@ -67,7 +69,7 @@ public final class Message {
 		return res;
 	}
 	
-	public static byte[] createDeleteHeader(String version, String peerID, String fileID, int chunkNo) {
+	public static byte[] createDeleteHeader(String version, String peerID, String fileID) {
 		byte[] res = createHeader(MessageType.DELETE, version, peerID, fileID, -1, -1);
 		return res;
 	}
@@ -101,6 +103,9 @@ public final class Message {
 	public static String[] splitMessage(String message) {
 		
 		int firstIndexOfCR = message.indexOf(CR);
+		System.out.println(message);
+		System.out.println(message.length());
+		System.out.println(firstIndexOfCR);
 		String header = message.substring(0, firstIndexOfCR);
 		String headerWithoutRepeatedSpaces = header.replaceAll(" +"," ");
 		String [] headerArgs = headerWithoutRepeatedSpaces.split(" ");
