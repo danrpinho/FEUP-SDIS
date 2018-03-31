@@ -124,8 +124,7 @@ public final class Utils {
 		System.out.println("Print HashMap: ");
 		for (String name: hash.keySet()){
 
-            
-            String value = hash.get(name).toString(); 
+           
             System.out.print(name);  
             System.out.println(": ");
             
@@ -141,6 +140,24 @@ public final class Utils {
             	}
             	System.out.println("}");
             }
+           
+         }
+	}
+	
+	public static void printChunksInPeer(ConcurrentHashMap<String, ArrayList<Integer> > hash) {
+		System.out.println("Print HashMap: ");
+		for (String name: hash.keySet()){
+
+            
+            
+           
+            	ArrayList<Integer> arr = hash.get(name);
+            	System.out.print(name);System.out.print(" { ");
+            	for(int i : arr) {
+            		System.out.print(i); System.out.print(" ");
+            	}
+            	System.out.println("}");
+            
            
          }
 	}

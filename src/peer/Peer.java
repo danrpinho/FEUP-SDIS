@@ -31,6 +31,7 @@ public class Peer implements RMIInterface{
 	private static ThreadMC MCThread;
 	private static ThreadMDR MDRThread;
 	private static ThreadMDB MDBThread;
+	private static FileHandler fileHandler;
 	private static int mcPort;
 	private static int mdrPort;
 	private static int mdbPort;
@@ -38,6 +39,7 @@ public class Peer implements RMIInterface{
 	private static InetAddress mdrAddress;
 	private static InetAddress mdbAddress;
 	private static ConcurrentHashMap<String, ArrayList<Integer>> chunksInPeer = new ConcurrentHashMap<String, ArrayList<Integer> >();
+	private static String chunksInPeerFilename = null;
 	
 	private static ConcurrentHashMap<String, ChunkStoreRecord> fileStores = new ConcurrentHashMap<String, ChunkStoreRecord>();
 
@@ -49,13 +51,18 @@ public class Peer implements RMIInterface{
 		return instance;
 	}
 	
-	public Peer() {};
+	private Peer() {
+	};
 	
 	public static void main(String[] args) throws IOException {
 		getInstance();		
 		
+		
+		
 		if(!validArgs(args))
 			return;
+		
+		chunksInPeerFilename = ((Integer) peerID).toString()+"-"+PeerCommands.ChunksInPeerPathName;
 		
 		if(initRMI(accessPoint) == false) 
 			return;
@@ -66,6 +73,7 @@ public class Peer implements RMIInterface{
 		MCThread = new ThreadMC(mcAddress, mcPort);
 		MDRThread = new ThreadMDR(mdrAddress, mdrPort);
 		MDBThread = new ThreadMDB(mdbAddress, mdbPort);
+		fileHandler = new FileHandler();
 		
 		readChunksInPeer();
 		launchThreads();
@@ -164,6 +172,7 @@ public class Peer implements RMIInterface{
 		(new Thread(MCThread)).start();
 		(new Thread(MDRThread)).start();
 		(new Thread(MDBThread)).start();
+		(new Thread(fileHandler)).start();
 	}
 
 	private static void closeThreads() throws IOException {
@@ -171,6 +180,7 @@ public class Peer implements RMIInterface{
 		MCThread.close();
 		MDRThread.close();
 		MDBThread.close();
+		Peer.writeChunksInPeer();
 	}
 
 	public static ConcurrentHashMap<String, ChunkStoreRecord> getFileStores() {
@@ -303,20 +313,22 @@ public class Peer implements RMIInterface{
 	public static void readChunksInPeer() {
 		try {
 		File file = null;
-		if((file = Utils.validFilePath(PeerCommands.ChunksInPeerPathName)) == null) {
+		if((file = Utils.validFilePath(chunksInPeerFilename)) == null) {
 			System.out.println("b1");
-			FileOutputStream out = new FileOutputStream(PeerCommands.ChunksInPeerPathName);
+			FileOutputStream out = new FileOutputStream(chunksInPeerFilename);
 			ObjectOutputStream oos = new ObjectOutputStream(out);
 			oos.writeObject(chunksInPeer);
 			oos.close();
 			
 		}
 		else {
-			FileInputStream in = new FileInputStream(PeerCommands.ChunksInPeerPathName);
+			FileInputStream in = new FileInputStream(chunksInPeerFilename);
 			ObjectInputStream ob = new ObjectInputStream(in);
 			chunksInPeer = (ConcurrentHashMap<String, ArrayList<Integer> >) ob.readObject();
 			ob.close();
-		}}
+		}
+		Utils.printChunksInPeer(chunksInPeer);
+		}
 		catch(Exception e) {
 			System.err.println("Error reading chunksInPeer file: "+e.toString());
 			e.printStackTrace();
@@ -328,7 +340,7 @@ public class Peer implements RMIInterface{
 	public static void writeChunksInPeer() {
 		FileOutputStream fos;
 		try {
-			fos = new FileOutputStream(PeerCommands.ChunksInPeerPathName);
+			fos = new FileOutputStream(chunksInPeerFilename);
 			ObjectOutputStream oos = new ObjectOutputStream(fos);
 			oos.writeObject(chunksInPeer);
 			oos.close();
