@@ -67,6 +67,7 @@ public class Peer implements RMIInterface{
 		MDRThread = new ThreadMDR(mdrAddress, mdrPort);
 		MDBThread = new ThreadMDB(mdbAddress, mdbPort);
 		
+		readChunksInPeer();
 		launchThreads();
 		
 		
@@ -303,8 +304,11 @@ public class Peer implements RMIInterface{
 		try {
 		File file = null;
 		if((file = Utils.validFilePath(PeerCommands.ChunksInPeerPathName)) == null) {
+			System.out.println("b1");
 			FileOutputStream out = new FileOutputStream(PeerCommands.ChunksInPeerPathName);
-			out.close();
+			ObjectOutputStream oos = new ObjectOutputStream(out);
+			oos.writeObject(chunksInPeer);
+			oos.close();
 			
 		}
 		else {
