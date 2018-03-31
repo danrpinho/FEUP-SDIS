@@ -37,7 +37,7 @@ public class Peer implements RMIInterface{
 	private static InetAddress mcAddress;
 	private static InetAddress mdrAddress;
 	private static InetAddress mdbAddress;
-	
+	private static ConcurrentHashMap<String, ArrayList<Integer>> chunksInPeer = new ConcurrentHashMap<String, ArrayList<Integer> >();
 	
 	private static ConcurrentHashMap<String, ChunkStoreRecord> fileStores = new ConcurrentHashMap<String, ChunkStoreRecord>();
 
@@ -298,4 +298,63 @@ public class Peer implements RMIInterface{
 		
 		return true;
 	}
+	
+	public static void readChunksInPeer() {
+		try {
+		File file = null;
+		if((file = Utils.validFilePath(PeerCommands.ChunksInPeerPathName)) == null) {
+			FileOutputStream out = new FileOutputStream(PeerCommands.ChunksInPeerPathName);
+			out.close();
+			
+		}
+		else {
+			FileInputStream in = new FileInputStream(PeerCommands.ChunksInPeerPathName);
+			ObjectInputStream ob = new ObjectInputStream(in);
+			chunksInPeer = (ConcurrentHashMap<String, ArrayList<Integer> >) ob.readObject();
+			ob.close();
+		}}
+		catch(Exception e) {
+			System.err.println("Error reading chunksInPeer file: "+e.toString());
+			e.printStackTrace();
+		}
+				
+			
+	}
+	
+	public static void writeChunksInPeer() {
+		FileOutputStream fos;
+		try {
+			fos = new FileOutputStream(PeerCommands.ChunksInPeerPathName);
+			ObjectOutputStream oos = new ObjectOutputStream(fos);
+			oos.writeObject(chunksInPeer);
+			oos.close();
+		} catch (FileNotFoundException e) {
+			System.err.println("Error writing chunksInPeer file: "+e.toString());
+			e.printStackTrace();
+		}
+		catch (IOException e) {
+			System.err.println("Error writing chunksInPeer file: "+e.toString());
+			e.printStackTrace();
+		}
+	
+	}
+	
+	public static void addToChunksInPeer(String fileID,  int chunk) {
+		if(chunksInPeer.containsKey(fileID)) {
+			ArrayList<Integer> chunks = chunksInPeer.get(fileID);
+			if(!chunks.contains(chunk))
+				chunks.add(chunk);
+			
+			chunksInPeer.put(fileID, chunks);
+		}
+		else {
+			ArrayList<Integer> chunks = new ArrayList<Integer>();
+			chunks.add(chunk);
+			
+			chunksInPeer.put(fileID, chunks);
+		}
+		
+	}
+	
+	
 }

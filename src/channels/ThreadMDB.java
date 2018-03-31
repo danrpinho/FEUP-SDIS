@@ -64,8 +64,10 @@ public class ThreadMDB extends MulticastThread {
 //		}
 		
 		Peer.addPeerToHashmap(header[3], chunkNo, currentID);
+		
 				
 		String filename = header[2] + "-" + header[3] + "." + header[4] + ".chunk";
+		Peer.addToChunksInPeer(filename, chunkNo);
 		FileOutputStream out = new FileOutputStream(filename);
 		out.write(chunk);
 		out.close();

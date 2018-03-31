@@ -129,7 +129,7 @@ public final class Utils {
             System.out.print(name);  
             System.out.println(": ");
             
-            HashMap<Integer,ArrayList<Integer>> hash2 = hash.get(name).peers;
+            ConcurrentHashMap<Integer,ArrayList<Integer>> hash2 = hash.get(name).peers;
             
             
             
