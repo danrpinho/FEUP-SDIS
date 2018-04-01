@@ -11,6 +11,7 @@ import java.net.DatagramPacket;
 
 import peer.Message;
 import peer.Peer;
+import peer.RestoreStatus;
 import utils.Utils;
 
 
@@ -25,7 +26,7 @@ public class ThreadMDR extends MulticastThread {
 		while(true) {
 			try {
 				DatagramPacket packet = receivePacket(64512);
-				String firstWord = getFirstWord(new String(packet.getData(), "UTF-8"));
+				String firstWord = getFirstWord(new String(packet.getData(), "ISO-8859-1"));
 				if (firstWord.equals("CHUNK")) {
 					receive(packet);
 				} else {
@@ -38,10 +39,15 @@ public class ThreadMDR extends MulticastThread {
 	}	
 	
 	public boolean receive(DatagramPacket packet) throws UnsupportedEncodingException, IOException, InterruptedException {
-		String[] packetData = new String(packet.getData(), "UTF-8").split(Message.endHeader);
+		Peer.getInstance().incrementMdrPacketsReceived();
+		if(Peer.getInstance().getCurrentRestore() == null)
+			return false;
+		
+		String[] packetData = new String(packet.getData(), "ISO-8859-1").split(Message.endHeader, 2);
 		byte[] chunk = packetData[1].getBytes();
 		String[] header = packetData[0].split(" ");
 		packetData = null;
+		
 		if (header[2].equals(Integer.toString(Peer.getInstance().getPeerID()))) // avoids storing chunks
 			return false;
 		
@@ -49,19 +55,27 @@ public class ThreadMDR extends MulticastThread {
 		int chunkNo = Integer.parseInt(header[4]);
 		int replicationDeg = Integer.parseInt(header[5]);
 		
-//		if (Peer.getInstance().getFileStores().contains(header[3]) &&
-//			Peer.getInstance().getFileStores().get(header[3]).peers.containsKey(chunkNo) &&
-//			Peer.getInstance().getFileStores().get(header[3]).peers.get(chunkNo).contains(currentID)) {
-//			return true;
+		//checks target chunk
+		if (!(Peer.getInstance().getCurrentRestore().getFileID().equals(header[3]) && 
+				chunkNo == Peer.getInstance().getCurrentRestore().getChunkNo()))
+			return false;
+		
+		Peer.getInstance().getCurrentRestore().setReceived(true);
+		
+//		// checks if peer had already stored target chunk
+//		if (Peer.peerStoredChunk(header[3], chunkNo, currentID)) {
+//			return false;
 //		}
-				
-		String filename = header[2] + "-" + header[3] + "." + header[4] + ".chunk";
+
+		//saves chunk
+		String filename = ((Integer) currentID).toString() + "-" + header[3] + "." + header[4] + ".chunk";
+		Peer.addToChunksInPeer(header[3], chunkNo);
 		FileOutputStream out = new FileOutputStream(filename);
 		out.write(chunk);
 		out.close();
-		
-		// TODO resolver statics do Protocol.createStoredHeader
+
 		return true;
+
 	}
 
 }
