@@ -41,6 +41,7 @@ public class Peer implements RMIInterface{
 	private static InetAddress mdbAddress;
 	private static ConcurrentHashMap<String, ArrayList<Integer>> chunksInPeer = new ConcurrentHashMap<String, ArrayList<Integer> >();
 	private static String chunksInPeerFilename = null;
+	private static String fileStoresFilename = null;
 	private static RestoreStatus currentRestore = null;
 	private static int mdrPacketsReceived = 0;
 	
@@ -70,6 +71,7 @@ public class Peer implements RMIInterface{
 			return;
 		
 		chunksInPeerFilename = ((Integer) peerID).toString()+"-"+PeerCommands.ChunksInPeerPathName;
+		fileStoresFilename = ((Integer) peerID).toString()+"-"+PeerCommands.FileStoresPathName;
 		
 		if(initRMI(accessPoint) == false) 
 			return;
@@ -83,6 +85,7 @@ public class Peer implements RMIInterface{
 		fileHandler = new FileHandler();
 		
 		readChunksInPeer();
+		readFileStores();
 		launchThreads();
 		
 		
@@ -188,6 +191,7 @@ public class Peer implements RMIInterface{
 		MDRThread.close();
 		MDBThread.close();
 		Peer.writeChunksInPeer();
+		Peer.writeFileStores();
 	}
 
 	public static ConcurrentHashMap<String, ChunkStoreRecord> getFileStores() {
@@ -198,16 +202,16 @@ public class Peer implements RMIInterface{
 		fileStores = hashmap;
 	}
 
-	public static void createHashMapEntry(String fileID, int replicationDeg) {
+	/*public static void createHashMapEntry(String fileID, int replicationDeg) {
 		if (!fileStores.containsKey(fileID)) {
 			ChunkStoreRecord record = new ChunkStoreRecord(replicationDeg);
 			fileStores.put(fileID, record);
 		}
-	}
+	}*/
 	
-	public void createHashMapEntry(String fileID, int replicationDeg, int peerInit) {
+	public static void createHashMapEntry(String fileID, int replicationDeg, int peerInit) {
 		if (!fileStores.containsKey(fileID)) {
-			ChunkStoreRecord record = new ChunkStoreRecord(replicationDeg);
+			ChunkStoreRecord record = new ChunkStoreRecord(replicationDeg, peerInit);
 			fileStores.put(fileID, record);
 		}
 	}
@@ -370,12 +374,57 @@ public class Peer implements RMIInterface{
 			
 	}
 	
+	@SuppressWarnings("unchecked")
+	public static void readFileStores() {
+		try {
+		if((Utils.validFilePath(fileStoresFilename)) == null) {
+			FileOutputStream out = new FileOutputStream(fileStoresFilename);
+			ObjectOutputStream oos = new ObjectOutputStream(out);
+			oos.writeObject(fileStores);
+			oos.close();
+			
+		}
+		else {
+			FileInputStream in = new FileInputStream(fileStoresFilename);
+			ObjectInputStream ob = new ObjectInputStream(in);
+			fileStores = (ConcurrentHashMap<String, ChunkStoreRecord>) ob.readObject();
+			ob.close();
+		}
+		Utils.printHashMap(fileStores);
+		}
+		catch(Exception e) {
+			System.err.println("Error reading chunksInPeer file: "+e.toString());
+			e.printStackTrace();
+		}
+				
+			
+	}
+	
 	public static void writeChunksInPeer() {
 		FileOutputStream fos;
 		try {
 			fos = new FileOutputStream(chunksInPeerFilename);
 			ObjectOutputStream oos = new ObjectOutputStream(fos);
 			oos.writeObject(chunksInPeer);
+			oos.close();
+		} catch (FileNotFoundException e) {
+			System.err.println("Error writing chunksInPeer file: "+e.toString());
+			e.printStackTrace();
+		}
+		catch (IOException e) {
+			System.err.println("Error writing chunksInPeer file: "+e.toString());
+			e.printStackTrace();
+		}
+	
+	}
+	
+	
+	public static void writeFileStores() {
+		FileOutputStream fos;
+		try {
+			fos = new FileOutputStream(fileStoresFilename);
+			ObjectOutputStream oos = new ObjectOutputStream(fos);
+			oos.writeObject(fileStores);
 			oos.close();
 		} catch (FileNotFoundException e) {
 			System.err.println("Error writing chunksInPeer file: "+e.toString());

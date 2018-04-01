@@ -1,13 +1,20 @@
 package peer;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class ChunkStoreRecord {
+public class ChunkStoreRecord implements Serializable {
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	public ConcurrentHashMap<Integer, ArrayList<Integer>> peers;
-	public int replicationDeg;
+	private int replicationDeg;
 	private int peerInit;
 	
 	public ChunkStoreRecord(int replicationDeg) {
@@ -21,6 +28,7 @@ public class ChunkStoreRecord {
 		super();
 		this.peers = new ConcurrentHashMap<Integer,ArrayList<Integer>>();
 		this.replicationDeg = 0;
+		this.peerInit = 0;
 	}
 	
 	public ChunkStoreRecord(int replicationDeg, int peerInit) {
@@ -48,4 +56,24 @@ public class ChunkStoreRecord {
 	public void setReplicationDeg(int replicationDeg) {
 		this.replicationDeg = replicationDeg;
 	}	
+	
+	public int getPeerInit(){
+		return peerInit;
+	}
+	
+	 private void readObject( ObjectInputStream aInputStream) throws ClassNotFoundException, IOException {
+		     //always perform the default de-serialization first
+		     aInputStream.defaultReadObject();
+
+		     
+		  }
+
+		    /**
+		    * This is the default implementation of writeObject.
+		    * Customise if necessary.
+		    */
+		    private void writeObject(ObjectOutputStream aOutputStream) throws IOException {
+		      //perform the default serialization for all non-transient, non-static fields
+		      aOutputStream.defaultWriteObject();
+		    }
 }
