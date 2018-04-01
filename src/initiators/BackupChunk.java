@@ -22,12 +22,17 @@ public class BackupChunk implements Runnable {
 	private int replicationDeg;
 	private MulticastSocket mdbSocket = null;
 	
-	public BackupChunk(String fileID, byte[] content, int currentChunk, int replicationDeg) throws IOException {
+	public BackupChunk(String fileID, byte[] content, int currentChunk, int replicationDeg) {
 		this.fileID = fileID;
 		this.content = content;
 		this.currentChunk = currentChunk;
 		this.replicationDeg = replicationDeg;
-		mdbSocket = new MulticastSocket();
+		try {
+			mdbSocket = new MulticastSocket();
+		} catch (IOException e) {
+			System.err.println("Exception in BackupChunk Constructor");
+			e.printStackTrace();
+		}
 	}
 	
 	@Override

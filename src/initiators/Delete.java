@@ -28,13 +28,12 @@ public class Delete implements Runnable {
 	
 	@Override
 	public void run() {
-		byte[] message = Message.createDeleteHeader(Peer.getVersion(), ((Integer) Peer.getPeerID()).toString(), this.fileID);;
+		byte[] message = Message.createDeleteHeader(Peer.getVersion(), ((Integer) Peer.getPeerID()).toString(), this.fileID);
 		DatagramPacket packet = new DatagramPacket(message, message.length, Peer.getMCAddress(), Peer.getMCPort());
 		try {
 			System.out.print("Delete Message will be sent: ");
 			System.out.println(message.length);
 			System.out.println(new String(message));
-			System.out.println(new String(message).indexOf((char) 0x0D));
 			mcSocket.send(packet);
 		} catch (IOException e) {
 			System.err.println("Error in Sending Delete Message: "+e.toString());

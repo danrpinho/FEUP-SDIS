@@ -9,6 +9,7 @@ import java.net.MulticastSocket;
 import java.util.Random;
 
 import initiators.Backup;
+import javafx.util.Pair;
 import peer.Message;
 import peer.Peer;
 import utils.Utils;
@@ -66,7 +67,7 @@ public class ThreadMDB extends MulticastThread {
 		Peer.addPeerToHashmap(header[3], chunkNo, currentID);
 		Utils.printHashMap(Peer.getFileStores());
 		
-				
+		Peer.getPutchunksReceived().add(new Pair<String, Integer>(header[3], chunkNo));		
 		String filename = ((Integer) Peer.getPeerID()).toString() + "-" + header[3] + "." + header[4] + ".chunk";
 		Peer.addToChunksInPeer(header[3], chunkNo);
 		FileOutputStream out = new FileOutputStream(filename);

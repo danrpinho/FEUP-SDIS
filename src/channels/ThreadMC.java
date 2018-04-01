@@ -1,6 +1,7 @@
 package channels;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -16,6 +17,9 @@ import peer.ChunkStoreRecord;
 import peer.Message;
 import peer.Peer;
 import utils.Utils;
+
+import initiators.BackupChunk;
+import javafx.util.Pair;
 
 public class ThreadMC extends MulticastThread {
 
@@ -43,6 +47,7 @@ public class ThreadMC extends MulticastThread {
 						processDelete(packet);
 						break;
 					case "REMOVED":
+						processRemoved(packet);
 						break;
 					default:
 						throw new IOException("Invalid packet header!");
@@ -58,7 +63,7 @@ public class ThreadMC extends MulticastThread {
 		String[] arguments = Message.splitMessage(new String(packet.getData()));
 		Integer chunkNo = Integer.parseInt(arguments[4]);
 		Integer senderID = Integer.parseInt(arguments[2]);
-		Integer peerID = Peer.getInstance().getPeerID();
+		Integer peerID = Peer.getPeerID();
 		
 		if(Peer.peerStoredChunk(arguments[3], chunkNo, peerID)) {
 			String filename = peerID + "-" + arguments[3] + "." + chunkNo.toString() + ".chunk";
@@ -75,11 +80,11 @@ public class ThreadMC extends MulticastThread {
 			
 			DatagramPacket chunk = new DatagramPacket(message, message.length, Peer.getMDRAddress(), Peer.getMDRPort());	
 			MulticastSocket socket = new MulticastSocket();
-			Peer.getInstance().setMdrPacketsReceived(0);
+			Peer.setMdrPacketsReceived(0);
 			long timeout = Utils.generateRandomInteger(0, 400);	
 			// TODO isto pode parar o thread, se calhar e melhor criarmos uma thread nova para esta funcao
 			Thread.sleep(timeout);
-			if (Peer.getInstance().getMdrPacketsReceived() == 0)
+			if (Peer.getMdrPacketsReceived() == 0)
 				socket.send(chunk);
 		}		
 	}
@@ -123,6 +128,36 @@ public class ThreadMC extends MulticastThread {
 		Integer senderID = Integer.parseInt(arguments[2]);
 		if(senderID != Peer.getPeerID())
 			Peer.deleteFile(fileID);
+	}
+	
+	private void processRemoved(DatagramPacket packet) {
+		String[] arguments = Message.splitMessage((new String(packet.getData())));
+		String fileID = arguments[3];
+		Integer senderID = Integer.parseInt(arguments[2]);
+		Integer chunkNo = Integer.parseInt(arguments[4]);
+		
+		Peer.getFileStores().get(fileID).peers.get(chunkNo).remove((Object) senderID);
+		
+		if(Peer.getChunksInPeer().containsKey(fileID) && Peer.getChunksInPeer().get(fileID).contains(chunkNo)) {
+			File file= new File(((Integer) Peer.getPeerID()).toString() + "-"+ fileID+"."+chunkNo.toString()+".chunk");
+			FileInputStream stream = null;
+			byte [] content = new byte[Peer.getChunkSize()];
+			try {
+				stream = new FileInputStream(file);			
+				stream.read(content);
+				long timeout = Utils.generateRandomInteger(0, 400);	
+				// TODO isto pode parar o thread, se calhar e melhor criarmos uma thread nova para esta funcao
+				Thread.sleep(timeout);
+			} catch (IOException | InterruptedException e) {
+				System.err.println("Exception in processing Removed");
+				e.printStackTrace();
+			}
+			
+			if(Peer.getPutchunksReceived().contains(new Pair<String, Integer>(fileID, chunkNo))) {
+				(new Thread(new BackupChunk(fileID, content, chunkNo, 1))).start();
+				Peer.getPutchunksReceived().remove(new Pair<String, Integer>(fileID, chunkNo));
+			}
+		}
 	}
 
 	

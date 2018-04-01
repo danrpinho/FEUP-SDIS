@@ -15,6 +15,7 @@ import channels.ThreadMDB;
 import channels.ThreadMDR;
 import initiators.Backup;
 import initiators.Delete;
+import javafx.util.Pair;
 import rmi.RMIInterface;
 import utils.Utils;
 
@@ -45,13 +46,9 @@ public class Peer implements RMIInterface{
 	private static String fileStoresFilename = null;
 	private static RestoreStatus currentRestore = null;
 	private static int mdrPacketsReceived = 0;
-	private static final int chunkSize = 64000;
-	
-	private static ConcurrentHashMap<String, ChunkStoreRecord> fileStores = new ConcurrentHashMap<String, ChunkStoreRecord>();
-	
-	private static ConcurrentHashMap<String, ChunkStoreRecord> fileStoresInit = new ConcurrentHashMap<String, ChunkStoreRecord>();
-	private static ConcurrentHashMap<String, ChunkStoreRecord> fileStoresSaved = new ConcurrentHashMap<String, ChunkStoreRecord>();
-
+	private static final int chunkSize = 64000;	
+	private static ConcurrentHashMap<String, ChunkStoreRecord> fileStores = new ConcurrentHashMap<String, ChunkStoreRecord>();	
+	private static Vector<Pair<String, Integer> > putchunksReceived = new Vector<Pair<String, Integer> >();
 
 	public static Peer getInstance() {
 		if (instance == null) {
@@ -172,7 +169,8 @@ public class Peer implements RMIInterface{
 	}
 	
 	public void reclaim(int space) {
-		Peer.reclaimSpace(space);
+		Vector<Pair<String, Integer> >filesDeleted = Peer.reclaimSpace(space);
+		
 	}
 	
 	public void state() {
@@ -196,7 +194,15 @@ public class Peer implements RMIInterface{
 		Peer.writeChunksInPeer();
 		Peer.writeFileStores();
 	}
-
+	
+	public static int getChunkSize() {
+		return chunkSize;
+	}
+	
+	public static Vector<Pair<String, Integer> > getPutchunksReceived(){
+		return putchunksReceived;
+	}
+	
 	public static ConcurrentHashMap<String, ChunkStoreRecord> getFileStores() {
 		return fileStores;
 	}
@@ -204,14 +210,12 @@ public class Peer implements RMIInterface{
 	public static void setFileStores(ConcurrentHashMap<String, ChunkStoreRecord> hashmap) {
 		fileStores = hashmap;
 	}
-
-	/*public static void createHashMapEntry(String fileID, int replicationDeg) {
-		if (!fileStores.containsKey(fileID)) {
-			ChunkStoreRecord record = new ChunkStoreRecord(replicationDeg);
-			fileStores.put(fileID, record);
-		}
-	}*/
 	
+	public static ConcurrentHashMap<String, ArrayList<Integer>> getChunksInPeer() {
+		return chunksInPeer;
+	}
+
+		
 	public static void createHashMapEntry(String fileID, int replicationDeg, int peerInit) {
 		if (!fileStores.containsKey(fileID)) {
 			ChunkStoreRecord record = new ChunkStoreRecord(replicationDeg, peerInit);
@@ -497,9 +501,9 @@ public class Peer implements RMIInterface{
 		return spaceCount;
 	}
 	
-	public static ConcurrentHashMap<String, ArrayList<Integer>> reclaimSpace(int space) {
+	public static Vector<Pair<String, Integer>> reclaimSpace(int space) {
 		
-		ConcurrentHashMap<String, ArrayList<Integer>> eliminatedFiles = new ConcurrentHashMap<String, ArrayList<Integer>>();
+		Vector<Pair<String, Integer>> eliminatedFiles = new Vector<Pair<String, Integer>>();
 		
 		int finalNoChunks = (int) Math.ceil(space/ (double) Peer.chunkSize);
 		int noChunksToBeDeleted = (int) Math.ceil(Peer.calculateUsedSpace()/ (double) Peer.chunkSize) - finalNoChunks;
@@ -515,13 +519,13 @@ public class Peer implements RMIInterface{
 			ChunkStoreRecord record = fileStores.get(fileID);
 			Iterator<Integer> chunksSavedIt = chunksSaved.iterator(); 
 			
-			ArrayList<Integer> eliminatedChunks = new ArrayList<Integer>();
+		
 			boolean fileIDExists = false;
 			while(chunksSavedIt.hasNext() && noChunksToBeDeleted > noChunksAlreadyDeleted) {
 				Integer chunkNo = (Integer) chunksSavedIt.next();
 				ArrayList <Integer> peersSavedChunk = record.getPeers().get(chunkNo);
 				if(peersSavedChunk.size() > record.getReplicationDeg()) {
-					eliminatedChunks.add(chunkNo);
+					eliminatedFiles.add(new Pair<String, Integer>(fileID, chunkNo));
 					deleteChunk(fileID, chunkNo);
 					System.out.println("b1");
 					chunksSavedIt.remove();					
@@ -535,8 +539,7 @@ public class Peer implements RMIInterface{
 				else
 					fileIDExists = true;
 			}
-			if(eliminatedChunks.size() > 0)
-				eliminatedFiles.put(fileID, eliminatedChunks);			
+					
 			if(chunksSaved.size() == 0)
 				chunksInPeer.remove(fileID);
 			if(fileIDExists == false && !chunksSavedIt.hasNext())
@@ -552,12 +555,12 @@ public class Peer implements RMIInterface{
 			ChunkStoreRecord record = fileStores.get(fileID);
 			Iterator<Integer> chunksSavedIt = chunksSaved.iterator(); 
 			
-			ArrayList<Integer> eliminatedChunks = new ArrayList<Integer>();
+		
 			boolean fileIDExists = false;
 			while(chunksSavedIt.hasNext() && noChunksToBeDeleted > noChunksAlreadyDeleted) {
 				Integer chunkNo = (Integer) chunksSavedIt.next();
 				ArrayList <Integer> peersSavedChunk = record.getPeers().get(chunkNo);
-				eliminatedChunks.add(chunkNo);
+				eliminatedFiles.add(new Pair<String, Integer>(fileID, chunkNo));
 				deleteChunk(fileID, chunkNo);
 				System.out.println("b2");
 				chunksSavedIt.remove();
@@ -568,8 +571,7 @@ public class Peer implements RMIInterface{
 				else
 					fileIDExists = true;
 			}
-			if(eliminatedChunks.size() > 0)
-				eliminatedFiles.put(fileID, eliminatedChunks);
+			
 			if(chunksSaved.size() == 0)
 				chunksInPeer.remove(fileID);
 			if(fileIDExists == false && !chunksSavedIt.hasNext())
