@@ -41,6 +41,8 @@ public class Peer implements RMIInterface{
 	private static InetAddress mdbAddress;
 	private static ConcurrentHashMap<String, ArrayList<Integer>> chunksInPeer = new ConcurrentHashMap<String, ArrayList<Integer> >();
 	private static String chunksInPeerFilename = null;
+	private static RestoreStatus currentRestore = null;
+	private static int mdrPacketsReceived = 0;
 	
 	private static ConcurrentHashMap<String, ChunkStoreRecord> fileStores = new ConcurrentHashMap<String, ChunkStoreRecord>();
 	
@@ -271,8 +273,26 @@ public class Peer implements RMIInterface{
 		return mdrAddress;
 	}
 	
+	public static RestoreStatus getCurrentRestore() {
+		return currentRestore;
+	}
+
+	public static void setCurrentRestore(RestoreStatus currentRestore) {
+		Peer.currentRestore = currentRestore;
+	}
+
+	public static int getMdrPacketsReceived() {
+		return mdrPacketsReceived;
+	}
+
+	public static void setMdrPacketsReceived(int mdrPacketsReceived) {
+		Peer.mdrPacketsReceived = mdrPacketsReceived;
+	}
 	
-	
+	public static void incrementMdrPacketsReceived() {
+		Peer.mdrPacketsReceived++;
+	}
+
 	public static boolean peerStoredChunk(String fileID, Integer chunkNo, Integer peerID) {
 		if (checkChunkPeers(fileID, chunkNo) <= 0) {
 			return false;

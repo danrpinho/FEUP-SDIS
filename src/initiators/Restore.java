@@ -8,6 +8,7 @@ import java.security.NoSuchAlgorithmException;
 
 import peer.Message;
 import peer.Peer;
+import peer.RestoreStatus;
 
 public class Restore implements Runnable {
 	
@@ -25,17 +26,23 @@ public class Restore implements Runnable {
 		if (file.length() % this.chunkSize == 0)
 			this.chunkCount++;
 	}
+	
 	public void run() {
 		try {
 			String fileID = Message.getFileData(file);
 			String version = Peer.getInstance().getVersion();
 			String peerID = ((Integer) Peer.getInstance().getPeerID()).toString();
 			for (int chunkNo = 0; chunkNo < chunkCount; chunkNo++) {
+				Peer.getInstance().setCurrentRestore(new RestoreStatus(fileID, chunkNo));
 				byte[] data = Message.createGetchunkHeader(version, peerID, fileID, chunkNo);
 				DatagramPacket packet = new DatagramPacket(data, data.length);
 				mcSocket.send(packet);
-				
-				//TODO verificar se o chunk foi recebido
+				Thread.sleep(500);
+				if(!Peer.getInstance().getCurrentRestore().isReceived()) {
+					return;
+					//TODO avisar que nao funcionou
+					//System.out.println("Chunk " + chunkNo + " missing from peers");
+				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
