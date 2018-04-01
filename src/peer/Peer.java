@@ -293,7 +293,7 @@ public class Peer implements RMIInterface{
 	
 	public static int checkChunkPeers(String fileID, Integer chunkNo) {
 		ConcurrentHashMap<String, ChunkStoreRecord> hashmap = getFileStores();
-		if (hashmap.contains(fileID)) {
+		if (hashmap.containsKey(fileID)) {
 			if (hashmap.get(fileID).peers.containsKey(chunkNo)) {
 				return hashmap.get(fileID).peers.get(chunkNo).size();
 			} else {
@@ -335,7 +335,6 @@ public class Peer implements RMIInterface{
 		try {
 		File file = null;
 		if((file = Utils.validFilePath(chunksInPeerFilename)) == null) {
-			System.out.println("b1");
 			FileOutputStream out = new FileOutputStream(chunksInPeerFilename);
 			ObjectOutputStream oos = new ObjectOutputStream(out);
 			oos.writeObject(chunksInPeer);
