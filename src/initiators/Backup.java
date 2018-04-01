@@ -112,7 +112,7 @@ public class Backup implements Runnable {
 		try {
 		String fileID = Message.getFileData(file);
 		FileInputStream stream = new FileInputStream(this.file);
-		Peer.getInstance().createHashMapEntry(fileID, replicationDeg);
+		Peer.createHashMapEntry(fileID, replicationDeg);
 		boolean success = true;
 		String version = Peer.getVersion();
 		String peerID = ((Integer) Peer.getPeerID()).toString();

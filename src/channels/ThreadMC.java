@@ -67,6 +67,7 @@ public class ThreadMC extends MulticastThread {
 		if(senderID != Peer.getPeerID())
 			Peer.addPeerToHashmap(arguments[3], chunkNo, senderID);
 		
+		System.out.println("Stored");
 		Utils.printHashMap(Peer.getFileStores());
 		
 //		if (hashMap.contains(arguments[3])) {		//must contain entry if a STORED message was received

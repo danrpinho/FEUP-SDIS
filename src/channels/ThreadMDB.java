@@ -62,8 +62,9 @@ public class ThreadMDB extends MulticastThread {
 //			Peer.getInstance().getFileStores().get(header[3]).peers.get(chunkNo).contains(currentID)) {
 //			return true;
 //		}
-		
+		Peer.createHashMapEntry(header[3], replicationDeg);
 		Peer.addPeerToHashmap(header[3], chunkNo, currentID);
+		Utils.printHashMap(Peer.getFileStores());
 		
 				
 		String filename = ((Integer) Peer.getPeerID()).toString() + "-" + header[3] + "." + header[4] + ".chunk";

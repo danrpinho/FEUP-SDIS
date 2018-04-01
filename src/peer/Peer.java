@@ -43,6 +43,10 @@ public class Peer implements RMIInterface{
 	private static String chunksInPeerFilename = null;
 	
 	private static ConcurrentHashMap<String, ChunkStoreRecord> fileStores = new ConcurrentHashMap<String, ChunkStoreRecord>();
+	
+	private static ConcurrentHashMap<String, ChunkStoreRecord> fileStoresInit = new ConcurrentHashMap<String, ChunkStoreRecord>();
+	private static ConcurrentHashMap<String, ChunkStoreRecord> fileStoresSaved = new ConcurrentHashMap<String, ChunkStoreRecord>();
+
 
 	public static Peer getInstance() {
 		if (instance == null) {
@@ -192,7 +196,14 @@ public class Peer implements RMIInterface{
 		fileStores = hashmap;
 	}
 
-	public void createHashMapEntry(String fileID, int replicationDeg) {
+	public static void createHashMapEntry(String fileID, int replicationDeg) {
+		if (!fileStores.containsKey(fileID)) {
+			ChunkStoreRecord record = new ChunkStoreRecord(replicationDeg);
+			fileStores.put(fileID, record);
+		}
+	}
+	
+	public void createHashMapEntry(String fileID, int replicationDeg, int peerInit) {
 		if (!fileStores.containsKey(fileID)) {
 			ChunkStoreRecord record = new ChunkStoreRecord(replicationDeg);
 			fileStores.put(fileID, record);
@@ -311,10 +322,12 @@ public class Peer implements RMIInterface{
 		return true;
 	}
 	
+	
+	
+	@SuppressWarnings("unchecked")
 	public static void readChunksInPeer() {
 		try {
-		File file = null;
-		if((file = Utils.validFilePath(chunksInPeerFilename)) == null) {
+		if((Utils.validFilePath(chunksInPeerFilename)) == null) {
 			FileOutputStream out = new FileOutputStream(chunksInPeerFilename);
 			ObjectOutputStream oos = new ObjectOutputStream(out);
 			oos.writeObject(chunksInPeer);

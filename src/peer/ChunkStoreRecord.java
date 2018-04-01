@@ -6,10 +6,15 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class ChunkStoreRecord {
 	
+	public ConcurrentHashMap<Integer, ArrayList<Integer>> peers;
+	public int replicationDeg;
+	private int peerInit;
+	
 	public ChunkStoreRecord(int replicationDeg) {
 		super();
 		this.peers = new ConcurrentHashMap<Integer,ArrayList<Integer>>();
 		this.replicationDeg = replicationDeg;
+		this.peerInit = 0;
 	}
 	
 	public ChunkStoreRecord() {
@@ -18,8 +23,15 @@ public class ChunkStoreRecord {
 		this.replicationDeg = 0;
 	}
 	
-	public ConcurrentHashMap<Integer, ArrayList<Integer>> peers;
-	public int replicationDeg;
+	public ChunkStoreRecord(int replicationDeg, int peerInit) {
+		super();
+		this.peers = new ConcurrentHashMap<Integer,ArrayList<Integer>>();
+		this.replicationDeg = replicationDeg;
+		this.peerInit = peerInit;
+	}
+	
+	
+	
 	
 	public ConcurrentHashMap<Integer, ArrayList<Integer>> getPeers() {
 		return peers;
