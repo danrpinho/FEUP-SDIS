@@ -30,6 +30,7 @@ public class Backup implements Runnable {
 	protected String senderID;*/
 	private File file;
 	final private int chunkSize = 64000;
+	final private int maximumFileSize = 2000000000;
 	
 	private int chunkCount;
 	private int replicationDeg;
@@ -107,7 +108,7 @@ public class Backup implements Runnable {
 	}*/
 
 
-	@Override
+	/*@Override
 	public void run(){
 		try {
 		String fileID = Message.getFileData(file);
@@ -136,12 +137,7 @@ public class Backup implements Runnable {
 				mdbSocket.send(packet);
 				System.out.println("Backup Packet sent after");
 				long timeout = (long) (1000 * Math.pow(2, resendCounter));
-				Thread.sleep(timeout);
-				/*Utils.printHashMap(Peer.getFileStores());
-				System.out.print("current chunk: ");
-				System.out.println(currentChunk);
-				System.out.println(Peer.getFileStores().containsKey(fileID));
-				System.out.println(Peer.getFileStores().get(fileID).peers.containsKey(currentChunk));*/
+				Thread.sleep(timeout);				
 				if (Peer.getFileStores().containsKey(fileID)
 						&& Peer.getFileStores().get(fileID).peers.containsKey(currentChunk)) {
 					if (Peer.getFileStores().get(fileID).peers.get(currentChunk)
@@ -158,7 +154,34 @@ public class Backup implements Runnable {
 			return;
 		}
 		
+	}*/
+	
+	
+	@Override
+	public void run(){
+		try {
+		String fileID = Message.getFileData(file);
+		FileInputStream stream = new FileInputStream(this.file);
+		Peer.createHashMapEntry(fileID, replicationDeg, Peer.getPeerID());
+		boolean success = true;
+		String version = Peer.getVersion();
+		String peerID = ((Integer) Peer.getPeerID()).toString();
+		byte [] fileContent = new byte[this.chunkCount*this.chunkSize];
+		stream.read(fileContent);
+
+		// reading from file this.chunkSize bytes at a time
+		for (int currentChunk = 0; currentChunk < this.chunkCount; currentChunk++) {
+			byte [] content = new byte[this.chunkSize];
+			System.arraycopy(fileContent, currentChunk*this.chunkSize, content, 0, this.chunkSize);
+			(new Thread(new BackupChunk(fileID, content, currentChunk, replicationDeg))).start();
+			
+		}}catch(Exception e) {
+			return;
+		}
+		
 	}
+	
+	
 	
 	
 
