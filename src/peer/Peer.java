@@ -15,6 +15,7 @@ import channels.ThreadMDB;
 import channels.ThreadMDR;
 import initiators.Backup;
 import initiators.Delete;
+import initiators.Restore;
 import javafx.util.Pair;
 import rmi.RMIInterface;
 import utils.Utils;
@@ -161,7 +162,14 @@ public class Peer implements RMIInterface{
 	}
 	
 	public void restore(File file) {
-		
+		System.out.println("Restore function called");
+		try {
+			new Thread(new Restore()).start();
+		}
+		catch(Exception e) {
+			System.err.println("Restore exception: "+e.toString());
+			e.printStackTrace();
+		}
 	}
 	
 	public void delete(File file) {
