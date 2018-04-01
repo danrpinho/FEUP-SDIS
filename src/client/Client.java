@@ -116,7 +116,7 @@ public class Client {
 		else if(args[1].equals(ClientCommands.RECLAIM)) {
 			if(args.length != ClientCommands.RECLAIM_NoArgs)
 				retValue = false;
-			else if((space=Utils.validInt(args[1])) <= 0)
+			else if((space=Utils.validInt(args[2])) < 0)
 				retValue = false;
 			
 			if(retValue == false)

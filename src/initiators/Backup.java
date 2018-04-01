@@ -28,8 +28,8 @@ public class Backup implements Runnable {
 
 	/*protected String version;
 	protected String senderID;*/
-	protected File file;
-	final protected int chunkSize = 64000;
+	private File file;
+	final private int chunkSize = 64000;
 	
 	private int chunkCount;
 	private int replicationDeg;
@@ -144,7 +144,6 @@ public class Backup implements Runnable {
 				System.out.println(Peer.getFileStores().get(fileID).peers.containsKey(currentChunk));*/
 				if (Peer.getFileStores().containsKey(fileID)
 						&& Peer.getFileStores().get(fileID).peers.containsKey(currentChunk)) {
-					System.out.println(Peer.getFileStores().get(fileID).peers.get(currentChunk).size());
 					if (Peer.getFileStores().get(fileID).peers.get(currentChunk)
 							.size() >= this.replicationDeg)
 						break;

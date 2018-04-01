@@ -6,6 +6,7 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.*;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -44,6 +45,7 @@ public class Peer implements RMIInterface{
 	private static String fileStoresFilename = null;
 	private static RestoreStatus currentRestore = null;
 	private static int mdrPacketsReceived = 0;
+	private static final int chunkSize = 64000;
 	
 	private static ConcurrentHashMap<String, ChunkStoreRecord> fileStores = new ConcurrentHashMap<String, ChunkStoreRecord>();
 	
@@ -148,6 +150,7 @@ public class Peer implements RMIInterface{
 		return true;
 	}
 	
+	/*These are the functions called by the RMI*/
 	public void backup(File file, int repDegree) {
 		System.out.println("Backup function called");
 		try {
@@ -169,7 +172,7 @@ public class Peer implements RMIInterface{
 	}
 	
 	public void reclaim(int space) {
-		
+		Peer.reclaimSpace(space);
 	}
 	
 	public void state() {
@@ -459,7 +462,7 @@ public class Peer implements RMIInterface{
 			ArrayList<Integer> chunks = chunksInPeer.get(fileID);
 			Iterator<Integer> itr =chunks.iterator();
 			while(itr.hasNext()) {
-				Integer i = (Integer) itr.next();
+				Integer i = itr.next();
 				System.out.println(i);
 				File file = new File(((Integer) peerID).toString()+"-"+fileID+"."+i.toString()+".chunk");
 				if(file.exists())
@@ -479,6 +482,114 @@ public class Peer implements RMIInterface{
 		
 		Peer.writeChunksInPeer();
 	
+	}
+	
+	public static boolean deleteChunk(String fileID, int chunkNo) {
+		File file = new File(((Integer) peerID).toString()+"-"+fileID+"."+((Integer) chunkNo).toString()+".chunk");
+		if(file.exists())
+			System.out.println("File exists");
+		else
+			System.out.println(((Integer) peerID).toString()+"-"+fileID+"."+((Integer) chunkNo).toString()+".chunk");
+		if(file.delete()) {
+			System.out.println("Deleted file "+fileID);
+			return true;
+		}
+		else {
+			System.out.println("Failed to delete file "+fileID);
+			return false;
+		}
+	}
+	
+	public static int calculateUsedSpace() {
+		int spaceCount = 0;
+		for (ArrayList<Integer> value : chunksInPeer.values()) {
+		    spaceCount = spaceCount + value.size() * Peer.chunkSize;
+		}
+		System.out.println("calculatespace");
+		System.out.println(spaceCount);
+		return spaceCount;
+	}
+	
+	public static void reclaimSpace(int space) {
+		
+		int finalNoChunks = (int) Math.ceil(space/ (double) Peer.chunkSize);
+		int noChunksToBeDeleted = (int) Math.ceil(Peer.calculateUsedSpace()/ (double) Peer.chunkSize) - finalNoChunks;
+		int noChunksAlreadyDeleted = 0;
+		System.out.println("Reclaim Space");
+		System.out.println(noChunksToBeDeleted);
+		Iterator<Entry<String, ArrayList<Integer>>> chunksInPeerIt = chunksInPeer.entrySet().iterator();
+		
+		while(chunksInPeerIt.hasNext() && noChunksToBeDeleted > noChunksAlreadyDeleted) {
+			Map.Entry pair = (Map.Entry) chunksInPeerIt.next();
+			String fileID = (String) pair.getKey();
+			ArrayList<Integer> chunksSaved = (ArrayList<Integer>) pair.getValue();
+			ChunkStoreRecord record = fileStores.get(fileID);
+			Iterator chunksSavedIt = chunksSaved.iterator(); 
+			
+			
+			boolean fileIDExists = false;
+			while(chunksSavedIt.hasNext() && noChunksToBeDeleted > noChunksAlreadyDeleted) {
+				Integer chunkNo = (Integer) chunksSavedIt.next();
+				ArrayList <Integer> peersSavedChunk = record.getPeers().get(chunkNo);
+				if(peersSavedChunk.size() > record.getReplicationDeg()) {
+					deleteChunk(fileID, chunkNo);
+					System.out.println("b1");
+					chunksSavedIt.remove();					
+					noChunksAlreadyDeleted ++;
+					peersSavedChunk.remove((Object) Peer.getPeerID());
+				}
+				
+				
+				if(peersSavedChunk.size() == 0)
+					record.getPeers().remove(peersSavedChunk);
+				else
+					fileIDExists = true;
+			}
+			
+			if(chunksSaved.size() == 0)
+				chunksInPeer.remove(fileID);
+			if(fileIDExists == false && !chunksSavedIt.hasNext())
+				fileStores.remove(fileID);
+		}
+		
+		chunksInPeerIt = chunksInPeer.entrySet().iterator();
+		
+		while(chunksInPeerIt.hasNext() && noChunksToBeDeleted > noChunksAlreadyDeleted) {
+			Map.Entry pair = (Map.Entry) chunksInPeerIt.next();
+			String fileID = (String) pair.getKey();
+			ArrayList<Integer> chunksSaved = (ArrayList<Integer>) pair.getValue();
+			ChunkStoreRecord record = fileStores.get(fileID);
+			Iterator chunksSavedIt = chunksSaved.iterator(); 
+			
+			boolean fileIDExists = false;
+			while(chunksSavedIt.hasNext() && noChunksToBeDeleted > noChunksAlreadyDeleted) {
+				Integer chunkNo = (Integer) chunksSavedIt.next();
+				ArrayList <Integer> peersSavedChunk = record.getPeers().get(chunkNo);
+				deleteChunk(fileID, chunkNo);
+				System.out.println("b2");
+				chunksSavedIt.remove();
+				noChunksAlreadyDeleted ++;						
+				peersSavedChunk.remove((Object) Peer.getPeerID());
+				if(peersSavedChunk.size() == 0)
+					record.getPeers().remove(peersSavedChunk);
+				else
+					fileIDExists = true;
+			}
+			
+			if(chunksSaved.size() == 0)
+				chunksInPeer.remove(fileID);
+			if(fileIDExists == false && !chunksSavedIt.hasNext())
+				fileStores.remove(fileID);
+		}
+	}
+	
+	public static void printMap(ConcurrentHashMap<String, ArrayList<Integer> > mp) {
+	    Iterator it = mp.entrySet().iterator();
+	    while (it.hasNext()) {
+	        Map.Entry pair = (Map.Entry)it.next();
+	        System.out.println(pair.getKey() + " = " + pair.getValue());
+	        it.remove(); // avoids a ConcurrentModificationException
+	    }
 	}
 	
 	

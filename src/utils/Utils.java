@@ -121,7 +121,7 @@ public final class Utils {
 	}*/
 	
 	public static void printHashMap(ConcurrentHashMap<String, ChunkStoreRecord> hash) {
-		/*System.out.println("Print HashMap FileStores: ");
+		System.out.println("Print HashMap FileStores: ");
 		for (String name: hash.keySet()){
 
            
@@ -146,12 +146,12 @@ public final class Utils {
            
          }
 		
-		System.out.println("Finished printing");*/
+		System.out.println("Finished printing");
 		
 	}
 	
 	public static void printChunksInPeer(ConcurrentHashMap<String, ArrayList<Integer> > hash) {
-		/*System.out.println("Print HashMap: ");
+		System.out.println("Print HashMap: ");
 		for (String name: hash.keySet()){                  
            
             	ArrayList<Integer> arr = hash.get(name);
@@ -162,7 +162,7 @@ public final class Utils {
             	System.out.println("}");
             
            
-         }*/
+         }
 	}
 
 
