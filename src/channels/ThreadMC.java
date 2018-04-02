@@ -137,27 +137,35 @@ public class ThreadMC extends MulticastThread {
 		Integer senderID = Integer.parseInt(arguments[2]);
 		Integer chunkNo = Integer.parseInt(arguments[4]);
 		
-		
+		System.out.print("It's going to remove file ");System.out.println(fileID);
+		System.out.println(chunkNo); System.out.println(senderID);
 		Peer.removeFileStoresPeer(fileID, chunkNo, senderID);
 			
 		if(Peer.getChunksInPeer().containsKey(fileID) && Peer.getChunksInPeer().get(fileID).contains(chunkNo) && 
 				Peer.getChunksInPeer().containsKey(fileID) && Peer.getChunksInPeer().get(fileID).contains(chunkNo) && 
-				Peer.getFileStores().get(fileID).peers.get(chunkNo).size() < Peer.getFileStores().get(fileID).getReplicationDeg()) {		
+				Peer.getFileStores().get(fileID).peers.get(chunkNo).size() < Peer.getFileStores().get(fileID).getReplicationDeg()) {
+			System.out.println("b6");
 			File file= new File(((Integer) Peer.getPeerID()).toString() + "-"+ fileID+"."+chunkNo.toString()+".chunk");
+			if(! file.exists())
+				System.out.println("File does not exist");
+				
 			FileInputStream stream = null;
 			byte [] content = new byte[Peer.getChunkSize()];
 			try {
 				stream = new FileInputStream(file);			
 				stream.read(content);
-				long timeout = Utils.generateRandomInteger(0, 400);	
+				long timeout = Utils.generateRandomInteger(0, 400);
+				Peer.getPutchunksReceived().clear();
 				// TODO isto pode parar o thread, se calhar e melhor criarmos uma thread nova para esta funcao
 				Thread.sleep(timeout);
 			} catch (IOException | InterruptedException e) {
 				System.err.println("Exception in processing Removed");
 				e.printStackTrace();
 			}
-			
+			System.out.println("b7");
+			Utils.printVectorOfPairs(Peer.getPutchunksReceived());
 			if(! Peer.getPutchunksReceived().contains(new Pair<String, Integer>(fileID, chunkNo))) {
+				System.out.println("b8");
 				(new Thread(new BackupChunk(fileID, content, chunkNo, 1))).start();
 				Peer.getPutchunksReceived().remove(new Pair<String, Integer>(fileID, chunkNo));
 			}

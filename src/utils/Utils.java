@@ -7,6 +7,7 @@ import java.net.MulticastSocket;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
+import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -163,6 +164,14 @@ public final class Utils {
             
            
          }
+	}
+	
+	public static void printVectorOfPairs(Vector<Pair<String, Integer>> vec) {
+		System.out.println("Print Vector of Pairs:");
+		for(int i =0; i < vec.size(); i++) {
+			System.out.print(vec.elementAt(i).getKey());System.out.println(" ");System.out.println(vec.elementAt(i).getValue());
+		}
+		
 	}
 
 

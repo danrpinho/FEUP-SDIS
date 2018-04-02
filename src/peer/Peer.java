@@ -316,8 +316,9 @@ public class Peer implements RMIInterface{
 	}
 	
 	public static void removeFileStoresPeer(String fileID, Integer chunkNo, Integer peerID) {
-		if(fileStores.containsKey(fileID) && fileStores.get(fileID).peers.contains(chunkNo))
+		if(fileStores.containsKey(fileID) && fileStores.get(fileID).peers.containsKey(chunkNo) && fileStores.get(fileID).peers.get(chunkNo).contains(peerID)) {
 			fileStores.get(fileID).peers.get(chunkNo).remove((Object) peerID);	
+		}
 	}
 	
 	public static boolean peerStoredChunk(String fileID, Integer chunkNo, Integer peerID) {
@@ -521,7 +522,7 @@ public class Peer implements RMIInterface{
 		
 		Vector<Pair<String, Integer>> eliminatedFiles = new Vector<Pair<String, Integer>>();
 		
-		int finalNoChunks = (int) Math.ceil(space/ (double) Peer.chunkSize);
+		int finalNoChunks = (int) Math.floor(space/ (double) Peer.chunkSize);
 		int noChunksToBeDeleted = (int) Math.ceil(Peer.calculateUsedSpace()/ (double) Peer.chunkSize) - finalNoChunks;
 		int noChunksAlreadyDeleted = 0;
 		System.out.println("Reclaim Space");
@@ -536,7 +537,7 @@ public class Peer implements RMIInterface{
 			Iterator<Integer> chunksSavedIt = chunksSaved.iterator(); 
 			
 		
-			boolean fileIDExists = false;
+			
 			while(chunksSavedIt.hasNext() && noChunksToBeDeleted > noChunksAlreadyDeleted) {
 				Integer chunkNo = (Integer) chunksSavedIt.next();
 				ArrayList <Integer> peersSavedChunk = record.getPeers().get(chunkNo);
@@ -550,16 +551,11 @@ public class Peer implements RMIInterface{
 				}
 				
 				
-				if(peersSavedChunk.size() == 0)
-					record.getPeers().remove(peersSavedChunk);
-				else
-					fileIDExists = true;
 			}
 					
 			if(chunksSaved.size() == 0)
 				chunksInPeer.remove(fileID);
-			if(fileIDExists == false && !chunksSavedIt.hasNext())
-				fileStores.remove(fileID);
+			
 		}
 		
 		chunksInPeerIt = chunksInPeer.entrySet().iterator();
@@ -572,7 +568,7 @@ public class Peer implements RMIInterface{
 			Iterator<Integer> chunksSavedIt = chunksSaved.iterator(); 
 			
 		
-			boolean fileIDExists = false;
+			
 			while(chunksSavedIt.hasNext() && noChunksToBeDeleted > noChunksAlreadyDeleted) {
 				Integer chunkNo = (Integer) chunksSavedIt.next();
 				ArrayList <Integer> peersSavedChunk = record.getPeers().get(chunkNo);
@@ -582,16 +578,13 @@ public class Peer implements RMIInterface{
 				chunksSavedIt.remove();
 				noChunksAlreadyDeleted ++;						
 				peersSavedChunk.remove((Object) Peer.getPeerID());
-				if(peersSavedChunk.size() == 0)
-					record.getPeers().remove(peersSavedChunk);
-				else
-					fileIDExists = true;
+				
+				
 			}
 			
 			if(chunksSaved.size() == 0)
 				chunksInPeer.remove(fileID);
-			if(fileIDExists == false && !chunksSavedIt.hasNext())
-				fileStores.remove(fileID);
+			
 		}
 		
 		return eliminatedFiles;
