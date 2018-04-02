@@ -599,6 +599,13 @@ public class Peer implements RMIInterface{
 		
 		return eliminatedFiles;
 	}
+	
+	public static Integer getChunkPeerInit(String fileID) {
+		if(fileStores.containsKey(fileID))
+			return fileStores.get(fileID).getPeerInit();
+		else
+			return -1;
+	}
 
 	
 	

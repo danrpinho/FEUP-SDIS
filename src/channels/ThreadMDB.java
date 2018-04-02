@@ -47,8 +47,10 @@ public class ThreadMDB extends MulticastThread {
 		byte[] chunk = packetData[1].getBytes();
 		String[] header = packetData[0].split(" ");
 		int chunkNo = Integer.parseInt(header[4]);
+		String fileID = header[3];
 		packetData = null;
-		if (header[2].equals(Integer.toString(Peer.getPeerID())) || Peer.getReclaimedChunks().contains(new Pair<String, Integer> (header[3], chunkNo))) // avoids storing chunks
+		if (header[2].equals(Integer.toString(Peer.getPeerID())) || Peer.getReclaimedChunks().contains(new Pair<String, Integer> (fileID, chunkNo))
+				|| Peer.getChunkPeerInit(fileID) != -1) // avoids storing chunks
 			return false;
 		else {
 			int currentID = Peer.getPeerID();
@@ -62,18 +64,18 @@ public class ThreadMDB extends MulticastThread {
 			// {
 			// return true;
 			// }
-			Peer.createHashMapEntry(header[3], replicationDeg, Integer.parseInt(header[2]));
-			Peer.addPeerToHashmap(header[3], chunkNo, currentID);
+			Peer.createHashMapEntry(fileID, replicationDeg, Integer.parseInt(header[2]));
+			Peer.addPeerToHashmap(fileID, chunkNo, currentID);
 			Utils.printHashMap(Peer.getFileStores());
 
 			Peer.getPutchunksReceived().add(new Pair<String, Integer>(header[3], chunkNo));
-			String filename = ((Integer) Peer.getPeerID()).toString() + "-" + header[3] + "." + header[4] + ".chunk";
+			String filename = ((Integer) Peer.getPeerID()).toString() + "-" + fileID + "." + header[4] + ".chunk";
 			Peer.addToChunksInPeer(header[3], chunkNo);
 			FileOutputStream out = new FileOutputStream(filename);
 			out.write(chunk);
 			out.close();
 
-			byte[] confirmationData = Message.createStoredHeader(header[1], Integer.toString(currentID), header[3],
+			byte[] confirmationData = Message.createStoredHeader(header[1], Integer.toString(currentID), fileID,
 					chunkNo);
 			long timeout = (long) Utils.generateRandomInteger(0, 400);
 			Thread.sleep(timeout);
