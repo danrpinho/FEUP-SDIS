@@ -50,7 +50,7 @@ public class ThreadMDB extends MulticastThread {
 		String fileID = header[3];
 		packetData = null;
 		if (header[2].equals(Integer.toString(Peer.getPeerID())) || Peer.getReclaimedChunks().contains(new Pair<String, Integer> (fileID, chunkNo))
-				|| Peer.getChunkPeerInit(fileID) != -1) // avoids storing chunks
+				|| Peer.getChunkPeerInit(fileID) == Peer.getPeerID() ) // avoids storing chunks
 			return false;
 		else {
 			int currentID = Peer.getPeerID();
@@ -68,9 +68,10 @@ public class ThreadMDB extends MulticastThread {
 			Peer.addPeerToHashmap(fileID, chunkNo, currentID);
 			Utils.printHashMap(Peer.getFileStores());
 
-			Peer.getPutchunksReceived().add(new Pair<String, Integer>(header[3], chunkNo));
+			Peer.getPutchunksReceived().add(new Pair<String, Integer>(fileID, chunkNo));
+			System.out.println("Added putchunk "+fileID+((Integer) chunkNo).toString());
 			String filename = ((Integer) Peer.getPeerID()).toString() + "-" + fileID + "." + header[4] + ".chunk";
-			Peer.addToChunksInPeer(header[3], chunkNo);
+			Peer.addToChunksInPeer(fileID, chunkNo);
 			FileOutputStream out = new FileOutputStream(filename);
 			out.write(chunk);
 			out.close();
