@@ -43,6 +43,7 @@ public class ThreadTCP implements Runnable {
 		input.readFully(buffer);
 		DatagramPacket packet = new DatagramPacket(new byte[buffer.length], buffer.length);
 		packet.setData(buffer);
+		System.out.println("Calling ThreadMDR.receive");
 		ThreadMDR.receive(packet);
 	}
 
