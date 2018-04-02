@@ -47,40 +47,45 @@ public class ThreadMDB extends MulticastThread {
 		String[] packetData = new String(data, "ISO-8859-1").split(Message.endHeader, 2);
 		byte[] chunk = packetData[1].getBytes("ISO-8859-1");
 		String[] header = packetData[0].split(" ");
-		packetData = null;
-		
-		System.out.println("Chunk length: " + chunk.length);
-
-		if (header[2].equals(Integer.toString(Peer.getPeerID()))) // avoids storing chunks
-			return false;
-		
-		int currentID = Peer.getPeerID();
 		int chunkNo = Integer.parseInt(header[4]);
-		int replicationDeg = Integer.parseInt(header[5]);
-		
-//		if (Peer.getInstance().getFileStores().contains(header[3]) &&
-//			Peer.getInstance().getFileStores().get(header[3]).peers.containsKey(chunkNo) &&
-//			Peer.getInstance().getFileStores().get(header[3]).peers.get(chunkNo).contains(currentID)) {
-//			return true;
-//		}
-		Peer.createHashMapEntry(header[3], replicationDeg, Integer.parseInt(header[2]));
-		Peer.addPeerToHashmap(header[3], chunkNo, currentID);
-		Utils.printHashMap(Peer.getFileStores());
-		
-		Peer.getPutchunksReceived().add(new Pair<String, Integer>(header[3], chunkNo));		
-		String filename = ((Integer) Peer.getPeerID()).toString() + "-" + header[3] + "." + header[4] + ".chunk";
-		Peer.addToChunksInPeer(header[3], chunkNo);
-		FileOutputStream out = new FileOutputStream(filename);
-		out.write(chunk);
-		out.close();
-		
-		byte[] confirmationData = Message.createStoredHeader(header[1], Integer.toString(currentID), header[3], chunkNo);
-		long timeout  = (long) Utils.generateRandomInteger(0, 400);
-		Thread.sleep(timeout);
-		System.out.println("Stored message sent");
-		mcSocket.send(new DatagramPacket(confirmationData, confirmationData.length,Peer.getMCAddress(), Peer.getMCPort()));
-		
-		// TODO adicionar à hashtable se não estiver presente
-		return true;
+		String fileID = header[3];
+		packetData = null;
+		if (header[2].equals(Integer.toString(Peer.getPeerID())) || Peer.getReclaimedChunks().contains(new Pair<String, Integer> (fileID, chunkNo))
+				|| Peer.getChunkPeerInit(fileID) != -1) // avoids storing chunks
+			return false;
+		else {
+			int currentID = Peer.getPeerID();
+			
+			int replicationDeg = Integer.parseInt(header[5]);
+
+			// if (Peer.getInstance().getFileStores().contains(header[3]) &&
+			// Peer.getInstance().getFileStores().get(header[3]).peers.containsKey(chunkNo)
+			// &&
+			// Peer.getInstance().getFileStores().get(header[3]).peers.get(chunkNo).contains(currentID))
+			// {
+			// return true;
+			// }
+			Peer.createHashMapEntry(fileID, replicationDeg, Integer.parseInt(header[2]));
+			Peer.addPeerToHashmap(fileID, chunkNo, currentID);
+			Utils.printHashMap(Peer.getFileStores());
+
+			Peer.getPutchunksReceived().add(new Pair<String, Integer>(header[3], chunkNo));
+			String filename = ((Integer) Peer.getPeerID()).toString() + "-" + fileID + "." + header[4] + ".chunk";
+			Peer.addToChunksInPeer(header[3], chunkNo);
+			FileOutputStream out = new FileOutputStream(filename);
+			out.write(chunk);
+			out.close();
+
+			byte[] confirmationData = Message.createStoredHeader(header[1], Integer.toString(currentID), fileID,
+					chunkNo);
+			long timeout = (long) Utils.generateRandomInteger(0, 400);
+			Thread.sleep(timeout);
+			System.out.println("Stored message sent");
+			mcSocket.send(new DatagramPacket(confirmationData, confirmationData.length, Peer.getMCAddress(),
+					Peer.getMCPort()));
+
+			// TODO adicionar à hashtable se não estiver presente
+			return true;
+		}
 	}
 }
