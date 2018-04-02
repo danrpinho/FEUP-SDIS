@@ -1,17 +1,19 @@
 package channels;
 
+import java.io.DataInputStream;
 import java.io.IOException;
+import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-public class TCPThread implements Runnable {
+public class ThreadTCP implements Runnable {
 	
 	protected int port;
 	protected InetAddress address;
 	protected ServerSocket socketTCP;
 	
-	TCPThread (InetAddress address, int port) throws IOException{
+	public ThreadTCP (InetAddress address, int port) throws IOException{
 		//this.address = address;
 		this.port = port;
 		this.socketTCP = new ServerSocket(this.port);
@@ -28,15 +30,20 @@ public class TCPThread implements Runnable {
 				Socket data;
 				data = socketTCP.accept();
 				processData(data);
-			} catch (IOException e) {
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
 
 	}
 
-	private void processData(Socket data) {
-		
+	private void processData(Socket socket) throws IOException, InterruptedException {
+		DataInputStream input = new DataInputStream(socket.getInputStream());
+		byte[] buffer = new byte[input.available()];
+		input.readFully(buffer);
+		DatagramPacket packet = new DatagramPacket(new byte[buffer.length], buffer.length);
+		packet.setData(buffer);
+		ThreadMDR.receive(packet);
 	}
 
 	public int getPort() {

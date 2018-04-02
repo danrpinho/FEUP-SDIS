@@ -42,10 +42,14 @@ public class Restore implements Runnable {
 				byte[] data = Message.createGetchunkHeader(version, peerID, fileID, chunkNo);
 				DatagramPacket packet = new DatagramPacket(data, data.length, Peer.getMCAddress(), Peer.getMCPort());
 				mcSocket.send(packet);
-				Thread.sleep(500);
-				if(!Peer.getCurrentRestore().isReceived()) {
-					System.out.println("Chunk " + chunkNo + " missing from peers; Aborting.");
-					return;
+				if (Peer.getVersion().equals("1")) {
+					Thread.sleep(500);
+					if (!Peer.getCurrentRestore().isReceived()) {
+						System.out.println("Chunk " + chunkNo + " missing from peers; Aborting.");
+						return;
+					}
+				//} else {
+					
 				}
 			}
 			System.out.println("All " + chunkCount + " chunks received. Assembling file...");

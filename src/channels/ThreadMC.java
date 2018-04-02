@@ -1,13 +1,16 @@
 package channels;
 
 import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
+import java.net.Socket;
 
 import initiators.BackupChunk;
 import peer.Message;
@@ -103,8 +106,33 @@ public class ThreadMC extends MulticastThread {
 		}		
 	}
 	
-	private void processGetchunkEnhanced(DatagramPacket packet) {
-		// TODO Auto-generated method stub
+	private void processGetchunkEnhanced(DatagramPacket packet) throws IOException {
+		InetAddress address = packet.getAddress();
+		String[] arguments = Message.splitMessage(new String(packet.getData()));
+		Integer chunkNo = Integer.parseInt(arguments[4]);
+		Integer senderID = Integer.parseInt(arguments[2]);
+		Integer peerID = Peer.getPeerID();
+
+		if(Peer.peerStoredChunk(arguments[3], chunkNo, peerID)) {
+			String filename = peerID + "-" + arguments[3] + "." + chunkNo.toString() + ".chunk";
+			File fileIn = new File(filename);
+			FileInputStream fs = new FileInputStream(fileIn);
+			byte[] header = Message.createChunkHeader(arguments[1], peerID.toString(), arguments[3], chunkNo);
+			byte[] data = new byte[(int) fileIn.length()];
+			fs.read(data);
+			fs.close();
+			
+			ByteArrayOutputStream outputStream = new ByteArrayOutputStream(header.length + data.length);
+			outputStream.write(header);
+			outputStream.write(data);
+			byte[] message = outputStream.toByteArray(); // concatenating the two arrays
+			outputStream.close();
+			
+			Socket socket = new Socket(address, Peer.getMDRPort());
+			DataOutputStream output = new DataOutputStream(socket.getOutputStream());
+			output.write(message);
+			output.flush();
+		}		
 	}
 
 	

@@ -38,7 +38,7 @@ public class ThreadMDR extends MulticastThread {
 		}
 	}	
 	
-	public boolean receive(DatagramPacket packet) throws UnsupportedEncodingException, IOException, InterruptedException {
+	public static boolean receive(DatagramPacket packet) throws UnsupportedEncodingException, IOException, InterruptedException {
 		Peer.incrementMdrPacketsReceived();
 		if(Peer.getCurrentRestore() == null)
 			return false;
