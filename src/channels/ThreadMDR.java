@@ -1,18 +1,13 @@
 package channels;
 
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-
-import java.net.InetAddress;
-
 import java.io.UnsupportedEncodingException;
 import java.net.DatagramPacket;
+import java.net.InetAddress;
 
 import peer.Message;
 import peer.Peer;
-import peer.RestoreStatus;
-import utils.Utils;
 
 
 public class ThreadMDR extends MulticastThread {
@@ -26,6 +21,8 @@ public class ThreadMDR extends MulticastThread {
 		while(true) {
 			try {
 				DatagramPacket packet = receivePacket(64512);
+				System.out.print("Thread MDB Packet received: ");
+				System.out.println(new String(packet.getData()));
 				String firstWord = getFirstWord(new String(packet.getData(), "ISO-8859-1"));
 				if (firstWord.equals("CHUNK")) {
 					receive(packet);
@@ -53,7 +50,6 @@ public class ThreadMDR extends MulticastThread {
 		
 		int currentID = Peer.getInstance().getPeerID();
 		int chunkNo = Integer.parseInt(header[4]);
-		int replicationDeg = Integer.parseInt(header[5]);
 		
 		//checks target chunk
 		if (!(Peer.getInstance().getCurrentRestore().getFileID().equals(header[3]) && 

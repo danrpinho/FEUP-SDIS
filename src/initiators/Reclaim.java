@@ -1,13 +1,10 @@
 package initiators;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.MulticastSocket;
-import java.security.NoSuchAlgorithmException;
 import java.util.Vector;
 
-//import javafx.util.Pair;
 import peer.Message;
 import peer.Peer;
 import utils.Pair;

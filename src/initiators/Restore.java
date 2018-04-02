@@ -21,11 +21,13 @@ public class Restore implements Runnable {
 	private MulticastSocket mcSocket = null;
 
 
-	public Restore() {
+	public Restore(File file) throws IOException {
+		this.file = file;
 		this.chunkCount = (int) Math.ceil(file.length() / (double) this.chunkSize);
 		if (file.length() % this.chunkSize == 0)
 			this.chunkCount++;
-	}
+		this.mcSocket = new MulticastSocket();
+	}	
 	
 	public void run() {
 		try {
@@ -35,7 +37,7 @@ public class Restore implements Runnable {
 			for (int chunkNo = 0; chunkNo < chunkCount; chunkNo++) {
 				Peer.getInstance().setCurrentRestore(new RestoreStatus(fileID, chunkNo));
 				byte[] data = Message.createGetchunkHeader(version, peerID, fileID, chunkNo);
-				DatagramPacket packet = new DatagramPacket(data, data.length);
+				DatagramPacket packet = new DatagramPacket(data, data.length, Peer.getMCAddress(), Peer.getMCPort());
 				mcSocket.send(packet);
 				Thread.sleep(500);
 				if(!Peer.getInstance().getCurrentRestore().isReceived()) {

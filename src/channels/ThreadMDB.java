@@ -2,20 +2,14 @@ package channels;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
-import java.util.Random;
 
-import initiators.Backup;
-//import javafx.util.Pair;
 import peer.Message;
 import peer.Peer;
-import utils.Utils;
-
-import java.util.Random;
 import utils.Pair;
+import utils.Utils;
 
 public class ThreadMDB extends MulticastThread {
 	

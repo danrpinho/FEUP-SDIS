@@ -1,28 +1,12 @@
 package initiators;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.DatagramPacket;
 import java.net.MulticastSocket;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.LinkOption;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
 
-import peer.ChunkStoreRecord;
 import peer.Message;
 import peer.Peer;
-import utils.Utils;
-
-import java.lang.Thread;
 
 public class Backup implements Runnable {
 
@@ -76,6 +60,7 @@ public class Backup implements Runnable {
 		String peerID = ((Integer) Peer.getPeerID()).toString();
 		byte [] fileContent = new byte[this.chunkCount*this.chunkSize];
 		stream.read(fileContent);
+		stream.close();
 
 		// reading from file this.chunkSize bytes at a time
 		for (int currentChunk = 0; currentChunk < this.chunkCount; currentChunk++) {
