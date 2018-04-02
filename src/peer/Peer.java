@@ -41,13 +41,13 @@ public class Peer implements RMIInterface{
 	private static ThreadMC MCThread;
 	private static ThreadMDR MDRThread;
 	private static ThreadMDB MDBThread;
-	private static FileHandler fileHandler;
 	private static int mcPort;
 	private static int mdrPort;
 	private static int mdbPort;
 	private static InetAddress mcAddress;
 	private static InetAddress mdrAddress;
 	private static InetAddress mdbAddress;
+	private static FileHandler fileHandler;
 	private static ConcurrentHashMap<String, ArrayList<Integer>> chunksInPeer = new ConcurrentHashMap<String, ArrayList<Integer> >();
 	private static String chunksInPeerFilename = null;
 	private static String fileStoresFilename = null;
@@ -85,12 +85,13 @@ public class Peer implements RMIInterface{
 		if(initRMI(accessPoint) == false) 
 			return;
 		
-		
-		
-		
 		MCThread = new ThreadMC(mcAddress, mcPort);
-		MDRThread = new ThreadMDR(mdrAddress, mdrPort);
 		MDBThread = new ThreadMDB(mdbAddress, mdbPort);
+//		if(version.equals("2")) 
+//		MDRThread = new TCPThread(mdrAddress, mdrPort);
+//		else
+		MDRThread = new ThreadMDR(mdrAddress, mdrPort);
+		
 		fileHandler = new FileHandler();
 		
 		readChunksInPeer();

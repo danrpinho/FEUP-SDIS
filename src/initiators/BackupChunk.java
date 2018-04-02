@@ -46,19 +46,14 @@ public class BackupChunk implements Runnable {
 				byte[] message = outputStream.toByteArray(); // concatenating the two arrays
 				outputStream.close();
 
-				DatagramPacket packet = new DatagramPacket(message, message.length, Peer.getMDBAddress(),Peer.getMDBPort());
+				DatagramPacket packet = new DatagramPacket(message, message.length, Peer.getMDBAddress(),
+						Peer.getMDBPort());
 				System.out.println("Backup Packet sent before: " + fileID + "-" + currentChunk);
 				mdbSocket.send(packet);
 				System.out.println("Backup Packet sent after: " + fileID + "-" + currentChunk);
 				long timeout = (long) (1000 * Math.pow(2, resendCounter));
 				Thread.sleep(timeout);
-				/*
-				 * Utils.printHashMap(Peer.getFileStores());
-				 * System.out.print("current chunk: "); System.out.println(currentChunk);
-				 * System.out.println(Peer.getFileStores().containsKey(fileID));
-				 * System.out.println(Peer.getFileStores().get(fileID).peers.containsKey(
-				 * currentChunk));
-				 */
+				
 				if (Peer.getFileStores().containsKey(fileID)
 						&& Peer.getFileStores().get(fileID).peers.containsKey(currentChunk)) {
 					if (Peer.getFileStores().get(fileID).peers.get(currentChunk).size() >= this.replicationDeg) {
@@ -73,6 +68,7 @@ public class BackupChunk implements Runnable {
 				return;
 			}
 		}
+		
 		if (resendCounter == 5)
 			System.out.println("Max number of tries exceeded. Aborting.");
 	}
