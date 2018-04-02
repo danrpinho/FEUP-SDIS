@@ -13,9 +13,8 @@ public class Backup implements Runnable {
 	/*protected String version;
 	protected String senderID;*/
 	private File file;
-	final private int chunkSize = 64000;
-	final private int maximumFileSize = 2000000000;
-	
+	//final private int chunkSize = 64000;
+		
 	private long lastChunkSize;
 	private int chunkCount;
 	private int replicationDeg;
@@ -39,8 +38,8 @@ public class Backup implements Runnable {
 				this.replicationDeg = replicationDeg;
 
 			this.file = file;
-			this.chunkCount = (int) Math.ceil(file.length() / (double) this.chunkSize);
-			this.lastChunkSize = file.length() % this.chunkSize;
+			this.chunkCount = (int) Math.ceil(file.length() / (double) Peer.getChunkSize());
+			this.lastChunkSize = file.length() % Peer.getChunkSize();
 			if (this.lastChunkSize == 0)
 				this.chunkCount++;
 						
@@ -54,14 +53,14 @@ public class Backup implements Runnable {
 	@Override
 	public void run(){
 		try {
-			long currentChunkSize = this.chunkSize;
+			long currentChunkSize = Peer.getChunkSize();
 			String fileID = Message.getFileData(file);
 			FileInputStream stream = new FileInputStream(this.file);
 			Peer.createHashMapEntry(fileID, replicationDeg, Peer.getPeerID());
 			boolean success = true;
 			String version = Peer.getVersion();
 			String peerID = ((Integer) Peer.getPeerID()).toString();
-			byte[] fileContent = new byte[this.chunkCount * this.chunkSize];
+			byte[] fileContent = new byte[this.chunkCount * Peer.getChunkSize()];
 			stream.read(fileContent);
 			stream.close();
 
@@ -72,7 +71,7 @@ public class Backup implements Runnable {
 				}
 
 				byte[] content = new byte[(int) currentChunkSize];
-				System.arraycopy(fileContent, currentChunk * this.chunkSize, content, 0, (int) currentChunkSize);
+				System.arraycopy(fileContent, currentChunk * Peer.getChunkSize(), content, 0, (int) currentChunkSize);
 				(new Thread(new BackupChunk(fileID, content, currentChunk, replicationDeg))).start();
 
 			}

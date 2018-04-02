@@ -17,7 +17,7 @@ public class BackupChunk implements Runnable {
 	private String fileID = null;
 	private byte[] content = null;
 	private int currentChunk;
-	private final int chunkSize = 640;
+	//private final int chunkSize = 64000;
 	private int replicationDeg;
 	private MulticastSocket mdbSocket = null;
 	
@@ -42,7 +42,7 @@ public class BackupChunk implements Runnable {
 			
 			byte[] currentHeader = Message.createPutchunkHeader(Peer.getVersion(), ((Integer) Peer.getPeerID()).toString(), fileID, currentChunk, this.replicationDeg); // creating header
 
-			ByteArrayOutputStream outputStream = new ByteArrayOutputStream(currentHeader.length + this.chunkSize);
+			ByteArrayOutputStream outputStream = new ByteArrayOutputStream(currentHeader.length + Peer.getChunkSize());
 			outputStream.write(currentHeader);
 			outputStream.write(content);
 			byte[] message = outputStream.toByteArray(); // concatenating the two arrays
