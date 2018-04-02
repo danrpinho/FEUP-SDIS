@@ -36,8 +36,8 @@ public class ThreadMDR extends MulticastThread {
 	}	
 	
 	public boolean receive(DatagramPacket packet) throws UnsupportedEncodingException, IOException, InterruptedException {
-		Peer.getInstance().incrementMdrPacketsReceived();
-		if(Peer.getInstance().getCurrentRestore() == null)
+		Peer.incrementMdrPacketsReceived();
+		if(Peer.getCurrentRestore() == null)
 			return false;
 		
 		String[] packetData = new String(packet.getData(), "ISO-8859-1").split(Message.endHeader, 2);
@@ -45,18 +45,18 @@ public class ThreadMDR extends MulticastThread {
 		String[] header = packetData[0].split(" ");
 		packetData = null;
 		
-		if (header[2].equals(Integer.toString(Peer.getInstance().getPeerID()))) // avoids storing chunks
+		if (header[2].equals(Integer.toString(Peer.getPeerID()))) // avoids storing chunks
 			return false;
 		
-		int currentID = Peer.getInstance().getPeerID();
+		int currentID = Peer.getPeerID();
 		int chunkNo = Integer.parseInt(header[4]);
 		
 		//checks target chunk
-		if (!(Peer.getInstance().getCurrentRestore().getFileID().equals(header[3]) && 
-				chunkNo == Peer.getInstance().getCurrentRestore().getChunkNo()))
+		if (!(Peer.getCurrentRestore().getFileID().equals(header[3]) && 
+				chunkNo == Peer.getCurrentRestore().getChunkNo()))
 			return false;
 		
-		Peer.getInstance().getCurrentRestore().setReceived(true);
+		Peer.getCurrentRestore().setReceived(true);
 		
 //		// checks if peer had already stored target chunk
 //		if (Peer.peerStoredChunk(header[3], chunkNo, currentID)) {
