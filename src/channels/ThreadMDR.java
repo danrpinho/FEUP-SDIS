@@ -23,10 +23,10 @@ public class ThreadMDR extends MulticastThread {
 		while(true) {
 			try {
 				DatagramPacket packet = receivePacket(64512);
-				System.out.print("Thread MDB Packet received: ");
 				//System.out.println(new String(packet.getData()));
-				String firstWord = getFirstWord(new String(packet.getData(), "ISO-8859-1"));
-				if (firstWord.equals("CHUNK")) {
+				String protocol = getFirstWord(new String(packet.getData(), "ISO-8859-1"));
+				System.out.println("Thread MDB Packet received: " + protocol);
+				if (protocol.equals("CHUNK")) {
 					receive(packet);
 				} else {
 					throw new IOException("Invalid packet header!");

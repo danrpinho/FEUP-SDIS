@@ -27,10 +27,10 @@ public class ThreadMC extends MulticastThread {
 		while (true) {
 			try {
 				DatagramPacket packet = receivePacket(512);		
-				System.out.print("Thread MC Packet received: ");
 				//System.out.println(new String(packet.getData()));
 				String data = new String(packet.getData(), "ISO-8859-1");
 				String firstWord = Utils.getFirstWord(data);
+				System.out.println("Thread MC Packet received: " + firstWord);
 				switch(firstWord) {
 					case "STORED":
 						processStored(packet);

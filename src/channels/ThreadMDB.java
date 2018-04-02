@@ -1,5 +1,6 @@
 package channels;
 
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -13,7 +14,7 @@ import utils.Pair;
 import utils.Utils;
 
 public class ThreadMDB extends MulticastThread {
-	
+
 	private MulticastSocket mcSocket = null;
 
 	public ThreadMDB(InetAddress address, int port) throws IOException {
@@ -24,14 +25,22 @@ public class ThreadMDB extends MulticastThread {
 	@Override
 	public void run() {
 		System.out.println("Thread mdb run");
-		while(true) {
+		while (true) {
 			try {
 				DatagramPacket packet = receivePacket(64512);
-				System.out.print("Thread MDB Packet received: ");
-				//System.out.println(new String(packet.getData()));
-				String firstWord = getFirstWord(new String(packet.getData(), "ISO-8859-1"));
-				if (firstWord.equals("PUTCHUNK")) {
-					store(packet);
+				// System.out.println(new String(packet.getData()));
+				String protocol = getFirstWord(new String(packet.getData(), "ISO-8859-1"));
+				String version = getSecondWord(new String(packet.getData(), "ISO-8859-1"));
+				System.out.println("Thread MDB Packet received: " + protocol + ", v" + version);
+				if (protocol.equals("PUTCHUNK")) {
+					if (version.equals("1")) {
+						System.out.println("Starting backup protocol");
+						store(packet);
+					}
+					else if (version.equals("2")) {
+						System.out.println("Starting enhanced backup protocol");
+						storeEnhanced(packet);
+					}
 				} else {
 					throw new IOException("Invalid packet header!");
 				}
@@ -42,7 +51,6 @@ public class ThreadMDB extends MulticastThread {
 	}
 
 	public boolean store(DatagramPacket packet) throws IOException, InterruptedException {
-		System.out.println("Packet length: " + packet.getLength());
 		byte[] data = Arrays.copyOfRange(packet.getData(), 0, packet.getLength());
 		String[] packetData = new String(data, "ISO-8859-1").split(Message.endHeader, 2);
 		byte[] chunk = packetData[1].getBytes("ISO-8859-1");
@@ -55,38 +63,79 @@ public class ThreadMDB extends MulticastThread {
 			return false;
 		else {
 			int currentID = Peer.getPeerID();
-			
 			int replicationDeg = Integer.parseInt(header[5]);
 
-			// if (Peer.getInstance().getFileStores().contains(header[3]) &&
-			// Peer.getInstance().getFileStores().get(header[3]).peers.containsKey(chunkNo)
-			// &&
-			// Peer.getInstance().getFileStores().get(header[3]).peers.get(chunkNo).contains(currentID))
-			// {
-			// return true;
-			// }
 			Peer.createHashMapEntry(fileID, replicationDeg, Integer.parseInt(header[2]));
 			Peer.addPeerToHashmap(fileID, chunkNo, currentID);
 			Utils.printHashMap(Peer.getFileStores());
 
 			Peer.getPutchunksReceived().add(new Pair<String, Integer>(fileID, chunkNo));
-			System.out.println("Added putchunk "+fileID+((Integer) chunkNo).toString());
-			String filename = ((Integer) Peer.getPeerID()).toString() + "-" + fileID + "." + header[4] + ".chunk";
-			Peer.addToChunksInPeer(fileID, chunkNo);
-			FileOutputStream out = new FileOutputStream(filename);
-			out.write(chunk);
-			out.close();
-
-			byte[] confirmationData = Message.createStoredHeader(header[1], Integer.toString(currentID), fileID,
-					chunkNo);
-			long timeout = (long) Utils.generateRandomInteger(0, 400);
-			Thread.sleep(timeout);
-			System.out.println("Stored message sent");
-			mcSocket.send(new DatagramPacket(confirmationData, confirmationData.length, Peer.getMCAddress(),
-					Peer.getMCPort()));
-
-			// TODO adicionar à hashtable se não estiver presente
+			saveFile(Peer.getPeerID(), fileID, (Integer) chunkNo, chunk);
+			waitForSomeTime(400);
+			sendStoredChunk(header[1], currentID, fileID, chunkNo);
 			return true;
 		}
+	}
+
+	private boolean storeEnhanced(DatagramPacket packet) throws IOException, InterruptedException {
+		byte[] data = Arrays.copyOfRange(packet.getData(), 0, packet.getLength());
+		String[] packetData = new String(data, "ISO-8859-1").split(Message.endHeader, 2);
+		byte[] chunk = packetData[1].getBytes("ISO-8859-1");
+		String[] header = packetData[0].split(" ");
+
+		int chunkNo = Integer.parseInt(header[4]);
+		int replicationDeg = Integer.parseInt(header[5]);
+		int currentID = Peer.getPeerID();
+		String fileID = header[3];
+		packetData = null;
+		
+		System.out.println(fileID + "-" + chunkNo + "-" + replicationDeg + "-" + currentID + "-" + header[2]);
+
+		if (header[2].equals(Integer.toString(Peer.getPeerID())) || Peer.getReclaimedChunks().contains(new Pair<String, Integer> (fileID, chunkNo))
+				|| Peer.getChunkPeerInit(fileID) == Peer.getPeerID() ) { // avoids storing chunks
+			System.out.println("Ignoring owned chunk");
+			return false;
+		} else {
+			
+			System.out.println("Starting to process packet for " + fileID + ", " + chunkNo);
+			if (Peer.peerStoredChunk(fileID, chunkNo, currentID)) {
+				System.out.println("Peer has stored chunk");
+				sendStoredChunk(header[1], currentID, fileID, chunkNo);
+				return true;
+			}
+			
+			System.out.println("Peer has NOT stored chunk");
+			waitForSomeTime(400);
+
+			if (Peer.checkChunkPeers(fileID, chunkNo) >= replicationDeg)
+				return false;
+
+			Peer.createHashMapEntry(fileID, replicationDeg, Integer.parseInt(header[2]));
+			Peer.addPeerToHashmap(fileID, chunkNo, currentID);
+			Utils.printHashMap(Peer.getFileStores());
+			Peer.getPutchunksReceived().add(new Pair<String, Integer>(header[3], chunkNo));
+			saveFile(Peer.getPeerID(), fileID, (Integer) chunkNo, chunk);
+			sendStoredChunk(header[1], currentID, fileID, chunkNo);
+			return true;
+		}
+	}
+
+	private void sendStoredChunk(String version, Integer currentID, String fileID, Integer chunkNo) throws IOException {
+		System.out.println("Sending STORED...");
+		byte[] confirmationData = Message.createStoredHeader(version, Integer.toString(currentID), fileID, chunkNo);
+		mcSocket.send(new DatagramPacket(confirmationData, confirmationData.length, Peer.getMCAddress(), Peer.getMCPort()));
+	}
+
+	private void waitForSomeTime(int max) throws InterruptedException {
+		long timeout = (long) Utils.generateRandomInteger(0, max);
+		Thread.sleep(timeout);
+	}
+
+	private void saveFile(int peerID, String fileID, Integer chunkNo, byte[] chunk) throws IOException {
+		String filename = ((Integer) Peer.getPeerID()).toString() + "-" + fileID + "." + chunkNo + ".chunk";
+		Peer.addToChunksInPeer(fileID, chunkNo);
+		FileOutputStream out = new FileOutputStream(filename);
+		out.write(chunk);
+		out.close();
 	}
 }
