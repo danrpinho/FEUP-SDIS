@@ -9,12 +9,13 @@ import java.net.MulticastSocket;
 import java.util.Random;
 
 import initiators.Backup;
-import javafx.util.Pair;
+//import javafx.util.Pair;
 import peer.Message;
 import peer.Peer;
 import utils.Utils;
 
 import java.util.Random;
+import utils.Pair;
 
 public class ThreadMDB extends MulticastThread {
 	

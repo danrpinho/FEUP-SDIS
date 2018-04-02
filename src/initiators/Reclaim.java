@@ -7,9 +7,10 @@ import java.net.MulticastSocket;
 import java.security.NoSuchAlgorithmException;
 import java.util.Vector;
 
-import javafx.util.Pair;
+//import javafx.util.Pair;
 import peer.Message;
 import peer.Peer;
+import utils.Pair;
 
 public class Reclaim implements Runnable{
 	

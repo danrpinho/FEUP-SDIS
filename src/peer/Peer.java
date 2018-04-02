@@ -17,9 +17,10 @@ import initiators.Backup;
 import initiators.Delete;
 import initiators.Reclaim;
 import initiators.Restore;
-import javafx.util.Pair;
+//import javafx.util.Pair;
 import rmi.RMIInterface;
 import utils.Utils;
+import utils.Pair;
 
 import java.rmi.registry.Registry;
 import java.rmi.registry.LocateRegistry;
