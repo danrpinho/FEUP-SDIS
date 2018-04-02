@@ -52,11 +52,13 @@ public class Peer implements RMIInterface{
 	private static String chunksInPeerFilename = null;
 	private static String fileStoresFilename = null;
 	private static RestoreStatus currentRestore = null;
-	private static int mdrPacketsReceived = 0;
-	private static final int chunkSize = 64000;	
+	private static int mdrPacketsReceived = 0;	
 	private static ConcurrentHashMap<String, ChunkStoreRecord> fileStores = new ConcurrentHashMap<String, ChunkStoreRecord>();	
 	private static Vector<Pair<String, Integer> > putchunksReceived = new Vector<Pair<String, Integer> >();
 	private static Vector<Pair<String, Integer> > reclaimedChunks = new Vector<Pair<String, Integer> >();
+	
+	private static final int chunkSize = 64000;	
+	private static final int maximumCapacity = 10000000;
 
 	public static Peer getInstance() {
 		if (instance == null) {
@@ -540,7 +542,7 @@ public class Peer implements RMIInterface{
 		Iterator<Entry<String, ArrayList<Integer>>> chunksInPeerIt = chunksInPeer.entrySet().iterator();
 		
 		while(chunksInPeerIt.hasNext() && noChunksToBeDeleted > noChunksAlreadyDeleted) {
-			Map.Entry pair = (Map.Entry) chunksInPeerIt.next();
+			Map.Entry<String, ArrayList<Integer>> pair = (Entry<String, ArrayList<Integer>>) chunksInPeerIt.next();
 			String fileID = (String) pair.getKey();
 			ArrayList<Integer> chunksSaved = (ArrayList<Integer>) pair.getValue();
 			ChunkStoreRecord record = fileStores.get(fileID);
@@ -571,7 +573,7 @@ public class Peer implements RMIInterface{
 		chunksInPeerIt = chunksInPeer.entrySet().iterator();
 		
 		while(chunksInPeerIt.hasNext() && noChunksToBeDeleted > noChunksAlreadyDeleted) {
-			Map.Entry pair = (Map.Entry) chunksInPeerIt.next();
+			Map.Entry<String, ArrayList<Integer>> pair = (Entry<String, ArrayList<Integer>>) chunksInPeerIt.next();
 			String fileID = (String) pair.getKey();
 			ArrayList<Integer> chunksSaved = (ArrayList<Integer>) pair.getValue();
 			ChunkStoreRecord record = fileStores.get(fileID);
@@ -605,6 +607,51 @@ public class Peer implements RMIInterface{
 			return fileStores.get(fileID).getPeerInit();
 		else
 			return -1;
+	}
+	
+	public static Integer getPerceivedReplicationDegree(String fileID, Integer chunkNo) {
+		ChunkStoreRecord record = fileStores.get(fileID);
+		ArrayList <Integer> peersSavedChunk = record.getPeers().get(chunkNo);
+		return peersSavedChunk.size();
+	}
+	
+	public static Integer getChunkSize(String fileID, Integer chunkNo) {
+		File file = new File(((Integer )peerID).toString()+"-"+fileID+"."+chunkNo.toString()+".chunk");
+		return (int) file.length();
+	}
+	
+	public void printStateInit() {
+		
+	}
+	
+	public void printStateStored() {
+		System.out.println("Files Stored by this Peer:");
+		System.out.println("");
+		Iterator<Entry<String, ArrayList<Integer>>> chunksInPeerIt = chunksInPeer.entrySet().iterator();
+		while(chunksInPeerIt.hasNext()) {
+			Map.Entry<String, ArrayList<Integer>> pair = (Entry<String, ArrayList<Integer>>) chunksInPeerIt.next();
+			String fileID = (String) pair.getKey();
+			System.out.println(fileID);
+			ArrayList<Integer> chunks = pair.getValue();
+			
+			System.out.println("File ID: "+fileID);
+			System.out.println("");
+			
+			for(Integer chunkNo : chunks) {
+				System.out.println("	Chunk Number: "+chunkNo.toString());
+				System.out.println("	Chunk Size: "+getChunkSize(fileID, chunkNo));
+				System.out.println("	Perceived Replication Degree: "+Peer.getPerceivedReplicationDegree(fileID, chunkNo));
+				System.out.println("");
+			}
+			
+			
+			
+		}
+	}
+	
+	public void printState() {
+		printStateInit();
+		printStateStored();
 	}
 
 	
