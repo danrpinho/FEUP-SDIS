@@ -39,7 +39,7 @@ public class BackupChunk implements Runnable {
 		int resendCounter = 0;
 		while (resendCounter < 5) {
 			try {
-				byte[] currentHeader = Message.createPutchunkHeader(Peer.getVersion(),
+				byte[] currentHeader = Message.createPutchunkHeader(Peer.getVersion().toString(),
 						((Integer) Peer.getPeerID()).toString(), fileID, currentChunk, this.replicationDeg); // creating header
 				ByteArrayOutputStream outputStream = new ByteArrayOutputStream(currentHeader.length + content.length);
 				outputStream.write(currentHeader);
@@ -62,8 +62,10 @@ public class BackupChunk implements Runnable {
 				 */
 				if (Peer.getFileStores().containsKey(fileID)
 						&& Peer.getFileStores().get(fileID).peers.containsKey(currentChunk)) {
-					if (Peer.getFileStores().get(fileID).peers.get(currentChunk).size() >= this.replicationDeg)
+					if (Peer.getFileStores().get(fileID).peers.get(currentChunk).size() >= this.replicationDeg) {
+						resendCounter = 0;
 						break;
+					}
 				}
 				resendCounter++;
 			} catch (Exception e) {
@@ -72,7 +74,8 @@ public class BackupChunk implements Runnable {
 				return;
 			}
 		}
-
+		if (resendCounter == 5)
+			System.out.println("Max number of tries exceeded. Aborting.");
 	}
 
 }
