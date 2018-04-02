@@ -16,8 +16,9 @@ public class ChunkStoreRecord implements Serializable {
 	public ConcurrentHashMap<Integer, ArrayList<Integer>> peers;
 	private int replicationDeg;
 	private int peerInit;
+	private String fileName;
 	
-	public ChunkStoreRecord(int replicationDeg) {
+	/*public ChunkStoreRecord(int replicationDeg) {
 		super();
 		this.peers = new ConcurrentHashMap<Integer,ArrayList<Integer>>();
 		this.replicationDeg = replicationDeg;
@@ -29,13 +30,14 @@ public class ChunkStoreRecord implements Serializable {
 		this.peers = new ConcurrentHashMap<Integer,ArrayList<Integer>>();
 		this.replicationDeg = 0;
 		this.peerInit = 0;
-	}
+	}*/
 	
-	public ChunkStoreRecord(int replicationDeg, int peerInit) {
+	public ChunkStoreRecord(int replicationDeg, int peerInit, String fileName) {
 		super();
 		this.peers = new ConcurrentHashMap<Integer,ArrayList<Integer>>();
 		this.replicationDeg = replicationDeg;
 		this.peerInit = peerInit;
+		this.fileName = fileName;
 	}
 	
 	
@@ -59,6 +61,10 @@ public class ChunkStoreRecord implements Serializable {
 	
 	public int getPeerInit(){
 		return peerInit;
+	}
+	
+	public String getFileName() {
+		return fileName;
 	}
 	
 	 private void readObject( ObjectInputStream aInputStream) throws ClassNotFoundException, IOException {

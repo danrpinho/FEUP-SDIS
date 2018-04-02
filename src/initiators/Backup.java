@@ -56,7 +56,7 @@ public class Backup implements Runnable {
 			long currentChunkSize = Peer.getChunkSize();
 			String fileID = Message.getFileData(file);
 			FileInputStream stream = new FileInputStream(this.file);
-			Peer.createHashMapEntry(fileID, replicationDeg, Peer.getPeerID());
+			Peer.createHashMapEntry(fileID, replicationDeg, Peer.getPeerID(), file.toPath().getFileName().toString());
 			boolean success = true;
 			String version = Peer.getVersion();
 			String peerID = ((Integer) Peer.getPeerID()).toString();

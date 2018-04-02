@@ -65,7 +65,7 @@ public class ThreadMDB extends MulticastThread {
 			int currentID = Peer.getPeerID();
 			int replicationDeg = Integer.parseInt(header[5]);
 
-			Peer.createHashMapEntry(fileID, replicationDeg, Integer.parseInt(header[2]));
+			Peer.createHashMapEntry(fileID, replicationDeg, Integer.parseInt(header[2]), "");
 			Peer.addPeerToHashmap(fileID, chunkNo, currentID);
 			Utils.printHashMap(Peer.getFileStores());
 
@@ -110,7 +110,7 @@ public class ThreadMDB extends MulticastThread {
 			if (Peer.checkChunkPeers(fileID, chunkNo) >= replicationDeg)
 				return false;
 
-			Peer.createHashMapEntry(fileID, replicationDeg, Integer.parseInt(header[2]));
+			Peer.createHashMapEntry(fileID, replicationDeg, Integer.parseInt(header[2]), "");
 			Peer.addPeerToHashmap(fileID, chunkNo, currentID);
 			Utils.printHashMap(Peer.getFileStores());
 			Peer.getPutchunksReceived().add(new Pair<String, Integer>(header[3], chunkNo));
