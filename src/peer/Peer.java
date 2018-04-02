@@ -88,11 +88,8 @@ public class Peer implements RMIInterface{
 		
 		MCThread = new ThreadMC(mcAddress, mcPort);
 		MDBThread = new ThreadMDB(mdbAddress, mdbPort);
-//		if(version.equals("2")) 
-//		MDRThread = new TCPThread(mdrAddress, mdrPort);
-//		else
 		MDRThread = new ThreadMDR(mdrAddress, mdrPort);
-		
+
 		fileHandler = new FileHandler();
 		
 		readChunksInPeer();

@@ -1,13 +1,16 @@
 package channels;
 
 import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
+import java.net.Socket;
 
 import initiators.BackupChunk;
 import peer.Message;
@@ -37,10 +40,7 @@ public class ThreadMC extends MulticastThread {
 						processStored(packet);
 						break;
 					case "GETCHUNK":
-						if (version.equals("2"))
-							processGetchunkEnhanced(packet);
-						else
-							processGetchunk(packet);
+						processGetchunk(packet);
 						break;
 					case "DELETE":
 						processDelete(packet);
@@ -72,7 +72,6 @@ public class ThreadMC extends MulticastThread {
 	private void processGetchunk(DatagramPacket packet) throws IOException, InterruptedException {
 		String[] arguments = Message.splitMessage(new String(packet.getData()));
 		Integer chunkNo = Integer.parseInt(arguments[4]);
-		Integer senderID = Integer.parseInt(arguments[2]);
 		Integer peerID = Peer.getPeerID();
 
 		if(Peer.peerStoredChunk(arguments[3], chunkNo, peerID)) {
@@ -102,12 +101,6 @@ public class ThreadMC extends MulticastThread {
 			socket.close();
 		}		
 	}
-	
-	private void processGetchunkEnhanced(DatagramPacket packet) {
-		// TODO Auto-generated method stub
-	}
-
-	
 	
 	private void processDelete(DatagramPacket packet) {
 		String[] arguments = Message.splitMessage((new String(packet.getData())));
