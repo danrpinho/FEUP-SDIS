@@ -19,7 +19,6 @@ import java.util.Map.Entry;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 
-import channels.ThreadTCP;
 import channels.ThreadMC;
 import channels.ThreadMDB;
 import channels.ThreadMDR;
@@ -42,7 +41,6 @@ public class Peer implements RMIInterface{
 	private static ThreadMC MCThread;
 	private static ThreadMDR MDRThread;
 	private static ThreadMDB MDBThread;
-	private static ThreadTCP TCPThread;
 	private static int mcPort;
 	private static int mdrPort;
 	private static int mdbPort;
@@ -89,10 +87,7 @@ public class Peer implements RMIInterface{
 		
 		MCThread = new ThreadMC(mcAddress, mcPort);
 		MDBThread = new ThreadMDB(mdbAddress, mdbPort);
-		if (version.equals("2"))
-			TCPThread = new ThreadTCP(mdrAddress, mdrPort);
-		else
-			MDRThread = new ThreadMDR(mdrAddress, mdrPort);
+		MDRThread = new ThreadMDR(mdrAddress, mdrPort);
 
 		fileHandler = new FileHandler();
 		
@@ -203,10 +198,7 @@ public class Peer implements RMIInterface{
 		
 		System.out.println("Launch threads");
 		(new Thread(MCThread)).start();
-		if (version.equals("2"))
-			(new Thread(TCPThread)).start();
-		else
-			(new Thread(MDRThread)).start();
+		(new Thread(MDRThread)).start();
 		(new Thread(MDBThread)).start();
 		(new Thread(fileHandler)).start();
 	}

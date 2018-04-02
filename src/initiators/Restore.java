@@ -14,15 +14,14 @@ import peer.Peer;
 import peer.RestoreStatus;
 
 public class Restore implements Runnable {
-	
+
 	protected File file;
 	final protected int chunkSize = 64000;
-	
+
 	private int chunkCount;
 	private int replicationDeg;
 	private MulticastSocket mdbSocket = null;
 	private MulticastSocket mcSocket = null;
-
 
 	public Restore(File file) throws IOException {
 		this.file = file;
@@ -30,8 +29,8 @@ public class Restore implements Runnable {
 		if (file.length() % this.chunkSize == 0)
 			this.chunkCount++;
 		this.mcSocket = new MulticastSocket();
-	}	
-	
+	}
+
 	public void run() {
 		try {
 			String fileID = Message.getFileData(file);
@@ -42,15 +41,13 @@ public class Restore implements Runnable {
 				byte[] data = Message.createGetchunkHeader(version, peerID, fileID, chunkNo);
 				DatagramPacket packet = new DatagramPacket(data, data.length, Peer.getMCAddress(), Peer.getMCPort());
 				mcSocket.send(packet);
-				if (Peer.getVersion().equals("1")) {
-					Thread.sleep(500);
-					if (!Peer.getCurrentRestore().isReceived()) {
-						System.out.println("Chunk " + chunkNo + " missing from peers; Aborting.");
-						return;
-					}
-				//} else {
-					
+
+				Thread.sleep(500);
+				if (!Peer.getCurrentRestore().isReceived()) {
+					System.out.println("Chunk " + chunkNo + " missing from peers; Aborting.");
+					return;
 				}
+
 			}
 			System.out.println("All " + chunkCount + " chunks received. Assembling file...");
 			String filename = assembleFile(fileID);
@@ -58,7 +55,7 @@ public class Restore implements Runnable {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+
 	}
 
 	private String assembleFile(String fileID) throws IOException {
@@ -80,8 +77,8 @@ public class Restore implements Runnable {
 
 	public boolean restore(MulticastSocket mdrSocket, File file) throws NoSuchAlgorithmException, IOException {
 		String fileData = Message.getFileData(file);
-		
+
 		return false;
 	}
-	
+
 }

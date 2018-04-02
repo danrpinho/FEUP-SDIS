@@ -40,10 +40,7 @@ public class ThreadMC extends MulticastThread {
 						processStored(packet);
 						break;
 					case "GETCHUNK":
-						if (version.equals("2"))
-							processGetchunkEnhanced(packet);
-						else
-							processGetchunk(packet);
+						processGetchunk(packet);
 						break;
 					case "DELETE":
 						processDelete(packet);
@@ -75,7 +72,6 @@ public class ThreadMC extends MulticastThread {
 	private void processGetchunk(DatagramPacket packet) throws IOException, InterruptedException {
 		String[] arguments = Message.splitMessage(new String(packet.getData()));
 		Integer chunkNo = Integer.parseInt(arguments[4]);
-		Integer senderID = Integer.parseInt(arguments[2]);
 		Integer peerID = Peer.getPeerID();
 
 		if(Peer.peerStoredChunk(arguments[3], chunkNo, peerID)) {
@@ -105,37 +101,6 @@ public class ThreadMC extends MulticastThread {
 			socket.close();
 		}		
 	}
-	
-	private void processGetchunkEnhanced(DatagramPacket packet) throws IOException {
-		InetAddress address = packet.getAddress();
-		String[] arguments = Message.splitMessage(new String(packet.getData()));
-		Integer chunkNo = Integer.parseInt(arguments[4]);
-		Integer senderID = Integer.parseInt(arguments[2]);
-		Integer peerID = Peer.getPeerID();
-
-		if(Peer.peerStoredChunk(arguments[3], chunkNo, peerID)) {
-			String filename = peerID + "-" + arguments[3] + "." + chunkNo.toString() + ".chunk";
-			File fileIn = new File(filename);
-			FileInputStream fs = new FileInputStream(fileIn);
-			byte[] header = Message.createChunkHeader(arguments[1], peerID.toString(), arguments[3], chunkNo);
-			byte[] data = new byte[(int) fileIn.length()];
-			fs.read(data);
-			fs.close();
-			
-			ByteArrayOutputStream outputStream = new ByteArrayOutputStream(header.length + data.length);
-			outputStream.write(header);
-			outputStream.write(data);
-			byte[] message = outputStream.toByteArray(); // concatenating the two arrays
-			outputStream.close();
-			
-			Socket socket = new Socket(address, Peer.getMDRPort());
-			DataOutputStream output = new DataOutputStream(socket.getOutputStream());
-			output.write(message);
-			output.flush();
-		}		
-	}
-
-	
 	
 	private void processDelete(DatagramPacket packet) {
 		String[] arguments = Message.splitMessage((new String(packet.getData())));
