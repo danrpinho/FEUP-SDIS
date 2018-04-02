@@ -158,7 +158,7 @@ public class Peer implements RMIInterface{
 	
 	/*These are the functions called by the RMI*/
 	public void backup(File file, int repDegree) {
-		System.out.println("Backup function called");
+		
 		try {
 			new Thread(new Backup(file, repDegree)).start();
 		}
@@ -170,7 +170,7 @@ public class Peer implements RMIInterface{
 	}
 	
 	public void restore(File file) {
-		System.out.println("Restore function called");
+
 		try {
 			new Thread(new Restore(file)).start();
 		}
@@ -207,7 +207,7 @@ public class Peer implements RMIInterface{
 	
 	private static void launchThreads() {
 		
-		System.out.println("Launch threads");
+		
 		(new Thread(MCThread)).start();
 		(new Thread(MDRThread)).start();
 		(new Thread(MDBThread)).start();
@@ -425,7 +425,7 @@ public class Peer implements RMIInterface{
 			chunksInPeer = (ConcurrentHashMap<String, ArrayList<Integer> >) ob.readObject();
 			ob.close();
 		}
-		Utils.printChunksInPeer(chunksInPeer);
+		//Utils.printChunksInPeer(chunksInPeer);
 		}
 		catch(Exception e) {
 			System.err.println("Error reading chunksInPeer file: "+e.toString());
@@ -451,7 +451,7 @@ public class Peer implements RMIInterface{
 			fileStores = (ConcurrentHashMap<String, ChunkStoreRecord>) ob.readObject();
 			ob.close();
 		}
-		Utils.printHashMap(fileStores);
+		//Utils.printHashMap(fileStores);
 		}
 		catch(Exception e) {
 			System.err.println("Error reading chunksInPeer file: "+e.toString());
@@ -565,11 +565,9 @@ public class Peer implements RMIInterface{
 		
 		Vector<Pair<String, Integer>> eliminatedFiles = new Vector<Pair<String, Integer>>();
 		
-		//int finalNoChunks = (int) Math.floor(space/ (double) Peer.chunkSize);
-		//int noChunksToBeDeleted = (int) Math.ceil(Peer.calculateUsedSpace()/ (double) Peer.chunkSize) - finalNoChunks;
 		int spaceToBeDeleted = calculateUsedSpace() - space;
 		int spaceAlreadyDeleted = 0;
-		System.out.println("Reclaim Space");
+		
 		
 		Iterator<Entry<String, ArrayList<Integer>>> chunksInPeerIt = chunksInPeer.entrySet().iterator();
 		
@@ -589,7 +587,6 @@ public class Peer implements RMIInterface{
 					eliminatedFiles.add(new Pair<String, Integer>(fileID, chunkNo));
 					spaceAlreadyDeleted += getChunkSpace(fileID, chunkNo);
 					deleteChunk(fileID, chunkNo);
-					System.out.println("b1");
 					chunksSavedIt.remove();										
 					peersSavedChunk.remove((Object) Peer.getPeerID());	
 				}

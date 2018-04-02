@@ -16,7 +16,7 @@ public class ClientCommands {
 	public static final String BACKUP_Usage = "java TestApp <peer_ap> BACKUP <File_Path> <Replication_Degree>"; 
 	public static final String RESTORE_Usage = "java TestApp <peer_ap> RESTORE <File_Path>"; 
 	public static final String DELETE_Usage = "java TestApp <peer_ap> DELETE <File_Path>"; 
-	public static final String RECLAIM_Usage = "java TestApp <peer_ap> RECLAIM <File_Path>"; 
+	public static final String RECLAIM_Usage = "java TestApp <peer_ap> RECLAIM <space>"; 
 	public static final String STATE_Usage = "java TestApp <peer_ap> STATE";
 
 	public static void printUsage() {

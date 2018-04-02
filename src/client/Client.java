@@ -25,9 +25,8 @@ public class Client {
 			return;
 		}
 		
-		System.out.println("success");
+		System.out.println("The client application was called with success");
 		if(args[1].equals(ClientCommands.BACKUP)) {
-			System.out.println("we are going to call BACKUP");
 			rmiStub.backup(file, repDegree);
 		}
 		else if(args[1].equals(ClientCommands.RESTORE))

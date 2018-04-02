@@ -10,28 +10,16 @@ import peer.Peer;
 
 public class Backup implements Runnable {
 
-	/*protected String version;
-	protected String senderID;*/
+	
 	private File file;
-	//final private int chunkSize = 64000;
-		
 	private long lastChunkSize;
 	private int chunkCount;
 	private int replicationDeg;
 	private MulticastSocket mdbSocket = null;
 
-	
 
-	/*public enum ProtocolType {
-		BACKUP, RESTORE, DELETE, RECLAIM
-	}*/
-
-	
-
-	public Backup(/*ProtocolType type, String version, String senderID,*/ File file, int replicationDeg) throws IOException {
-		/*this.version = version;
-		this.senderID = senderID;*/
-		/*if (type == ProtocolType.BACKUP) {*/
+	public Backup( File file, int replicationDeg) throws IOException {
+		
 			if (replicationDeg < 1 || replicationDeg > 9) {
 				throw new IllegalArgumentException("Replication degree must be between 1 and 9");
 			} else
@@ -44,7 +32,7 @@ public class Backup implements Runnable {
 				this.chunkCount++;
 						
 			mdbSocket = new MulticastSocket();
-		/*}*/
+		
 	}
 
 	

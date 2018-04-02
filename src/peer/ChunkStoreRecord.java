@@ -18,19 +18,6 @@ public class ChunkStoreRecord implements Serializable {
 	private int peerInit;
 	private String fileName;
 	
-	/*public ChunkStoreRecord(int replicationDeg) {
-		super();
-		this.peers = new ConcurrentHashMap<Integer,ArrayList<Integer>>();
-		this.replicationDeg = replicationDeg;
-		this.peerInit = 0;
-	}
-	
-	public ChunkStoreRecord() {
-		super();
-		this.peers = new ConcurrentHashMap<Integer,ArrayList<Integer>>();
-		this.replicationDeg = 0;
-		this.peerInit = 0;
-	}*/
 	
 	public ChunkStoreRecord(int replicationDeg, int peerInit, String fileName) {
 		super();

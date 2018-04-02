@@ -30,7 +30,6 @@ public class ThreadMC extends MulticastThread {
 		while (true) {
 			try {
 				DatagramPacket packet = receivePacket(512);		
-				//System.out.println(new String(packet.getData()));
 				String data = new String(packet.getData(), "ISO-8859-1");
 				String firstWord = Utils.getFirstWord(data);
 				String version  = Utils.getSecondWord(data);
@@ -65,8 +64,6 @@ public class ThreadMC extends MulticastThread {
 		if(senderID != Peer.getPeerID())
 			Peer.addPeerToHashmap(arguments[3], chunkNo, senderID);
 		
-		System.out.println("Received Stored Message:");
-		Utils.printHashMap(Peer.getFileStores());
 	}	
 
 	private void processGetchunk(DatagramPacket packet) throws IOException, InterruptedException {
@@ -132,8 +129,7 @@ public class ThreadMC extends MulticastThread {
 				stream = new FileInputStream(file);			
 				stream.read(content);
 				long timeout = Utils.generateRandomInteger(0, 400);
-				System.out.print("Timeout: ");
-				System.out.println(timeout);
+				
 				Peer.getPutchunksReceived().clear();
 				// TODO isto pode parar o thread, se calhar e melhor criarmos uma thread nova para esta funcao
 				Thread.sleep(timeout);
@@ -142,7 +138,7 @@ public class ThreadMC extends MulticastThread {
 				e.printStackTrace();
 			}
 			
-			Utils.printVectorOfPairs(Peer.getPutchunksReceived());
+			
 			if(! Peer.getPutchunksReceived().contains(new Pair<String, Integer>(fileID, chunkNo))) {
 				
 				(new Thread(new BackupChunk(fileID, content, chunkNo, 1))).start();

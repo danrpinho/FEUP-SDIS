@@ -31,7 +31,6 @@ public class Reclaim implements Runnable{
 		for(int i=0; i < filesDeleted.size(); i++) {
 			String fileID = filesDeleted.elementAt(i).getKey();
 			Integer chunkNo = filesDeleted.elementAt(i).getValue();
-			//if(!Peer.getFileStores().containsKey(fileID) || !Peer.getFileStores().get(fileID).peers.containsKey(chunkNo) || Peer.getFileStores().get(fileID).peers.get(chunkNo).size() < Peer.getFileStores().get(fileID).getReplicationDeg()) {
 				System.out.println("Will send Removed Message");
 				byte[] message = Message.createRemovedHeader(Peer.getVersion(), ((Integer) Peer.getPeerID()).toString(), fileID, chunkNo);
 				DatagramPacket packet = new DatagramPacket(message, message.length, Peer.getMCAddress(), Peer.getMCPort());
@@ -40,8 +39,7 @@ public class Reclaim implements Runnable{
 				} catch (IOException e) {
 					System.err.println("Error in Delete Constructor: "+e.toString());
 					e.printStackTrace();
-				}
-			//}
+				}	
 		
 		}
 	}

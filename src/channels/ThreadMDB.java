@@ -1,6 +1,5 @@
 package channels;
 
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -24,21 +23,17 @@ public class ThreadMDB extends MulticastThread {
 
 	@Override
 	public void run() {
-		System.out.println("Thread mdb run");
 		while (true) {
 			try {
 				DatagramPacket packet = receivePacket(64512);
-				// System.out.println(new String(packet.getData()));
 				String protocol = Utils.getFirstWord(new String(packet.getData(), "ISO-8859-1"));
 				String version = Utils.getSecondWord(new String(packet.getData(), "ISO-8859-1"));
-				System.out.println("Thread MDB Packet received: " + protocol + ", v" + version);
+				System.out.println("Thread MDB Packet received: " + protocol);
 				if (protocol.equals("PUTCHUNK")) {
 					if (version.equals("1")) {
-						System.out.println("Starting backup protocol");
 						store(packet);
 					}
 					else if (version.equals("2")) {
-						System.out.println("Starting enhanced backup protocol");
 						storeEnhanced(packet);
 					}
 				} else {
@@ -67,7 +62,6 @@ public class ThreadMDB extends MulticastThread {
 
 			Peer.createHashMapEntry(fileID, replicationDeg, Integer.parseInt(header[2]), "");
 			Peer.addPeerToHashmap(fileID, chunkNo, currentID);
-			Utils.printHashMap(Peer.getFileStores());
 
 			Peer.getPutchunksReceived().add(new Pair<String, Integer>(fileID, chunkNo));
 			saveFile(Peer.getPeerID(), fileID, (Integer) chunkNo, chunk);
@@ -89,7 +83,7 @@ public class ThreadMDB extends MulticastThread {
 		String fileID = header[3];
 		packetData = null;
 		
-		System.out.println(fileID + "-" + chunkNo + "-" + replicationDeg + "-" + currentID + "-" + header[2]);
+		
 
 		if (header[2].equals(Integer.toString(Peer.getPeerID())) || Peer.getReclaimedChunks().contains(new Pair<String, Integer> (fileID, chunkNo))
 				|| Peer.getChunkPeerInit(fileID) == Peer.getPeerID() ) { // avoids storing chunks
@@ -97,7 +91,7 @@ public class ThreadMDB extends MulticastThread {
 			return false;
 		} else {
 			
-			System.out.println("Starting to process packet for " + fileID + ", " + chunkNo);
+			
 			if (Peer.peerStoredChunk(fileID, chunkNo, currentID)) {
 				System.out.println("Peer has stored chunk");
 				sendStoredChunk(header[1], currentID, fileID, chunkNo);
@@ -112,7 +106,6 @@ public class ThreadMDB extends MulticastThread {
 
 			Peer.createHashMapEntry(fileID, replicationDeg, Integer.parseInt(header[2]), "");
 			Peer.addPeerToHashmap(fileID, chunkNo, currentID);
-			Utils.printHashMap(Peer.getFileStores());
 			Peer.getPutchunksReceived().add(new Pair<String, Integer>(header[3], chunkNo));
 			saveFile(Peer.getPeerID(), fileID, (Integer) chunkNo, chunk);
 			sendStoredChunk(header[1], currentID, fileID, chunkNo);
