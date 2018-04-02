@@ -52,18 +52,7 @@ public abstract class MulticastThread implements Runnable {
 		System.out.println("MulticastThread run");
 	}
 	
-	protected String getFirstWord(String data) {
-		String[] stringArray = data.split(" ");
-		return stringArray[0];
-	}
 	
-	protected String getSecondWord(String data) {
-		String[] stringArray = data.split(" ");
-		if (stringArray.length >=2)
-			return stringArray[1];
-		else
-			return "";
-	}
 	
 	protected DatagramPacket receivePacket(int bufferSize) throws IOException {
 		byte[] rbuf = new byte[bufferSize];

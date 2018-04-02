@@ -41,13 +41,13 @@ public class Peer implements RMIInterface{
 	private static ThreadMC MCThread;
 	private static ThreadMDR MDRThread;
 	private static ThreadMDB MDBThread;
-	private static FileHandler fileHandler;
 	private static int mcPort;
 	private static int mdrPort;
 	private static int mdbPort;
 	private static InetAddress mcAddress;
 	private static InetAddress mdrAddress;
 	private static InetAddress mdbAddress;
+	private static FileHandler fileHandler;
 	private static ConcurrentHashMap<String, ArrayList<Integer>> chunksInPeer = new ConcurrentHashMap<String, ArrayList<Integer> >();
 	private static String chunksInPeerFilename = null;
 	private static String fileStoresFilename = null;
@@ -57,6 +57,7 @@ public class Peer implements RMIInterface{
 	private static ConcurrentHashMap<String, ChunkStoreRecord> fileStores = new ConcurrentHashMap<String, ChunkStoreRecord>();	
 	private static Vector<Pair<String, Integer> > putchunksReceived = new Vector<Pair<String, Integer> >();
 	private static Vector<Pair<String, Integer> > reclaimedChunks = new Vector<Pair<String, Integer> >();
+	
 
 	public static Peer getInstance() {
 		if (instance == null) {

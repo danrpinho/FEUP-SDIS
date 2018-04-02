@@ -47,15 +47,23 @@ public final class Utils {
 		return sb.toString();
 	}
 	
+	public static int generateRandomInteger(int min, int max) {
+		Random rand = new Random();
+		int randomNum = rand.nextInt((max - min) + 1) + min;
+		return randomNum;
+	}
+	
 	public static String getFirstWord(String data) {
 		String[] stringArray = data.split(" ");
 		return stringArray[0];
 	}
 	
-	public static int generateRandomInteger(int min, int max) {
-		Random rand = new Random();
-		int randomNum = rand.nextInt((max - min) + 1) + min;
-		return randomNum;
+	public static String getSecondWord(String data) {
+		String[] stringArray = data.split(" ");
+		if (stringArray.length >=2)
+			return stringArray[1];
+		else
+			return "";
 	}
 	
 	/*public String replaceWithPattern(String str,String replace){
