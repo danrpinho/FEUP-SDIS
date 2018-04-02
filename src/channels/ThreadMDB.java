@@ -54,7 +54,7 @@ public class ThreadMDB extends MulticastThread {
 		String fileID = header[3];
 		packetData = null;
 		if (header[2].equals(Integer.toString(Peer.getPeerID())) || Peer.getReclaimedChunks().contains(new Pair<String, Integer> (fileID, chunkNo))
-				|| Peer.getChunkPeerInit(fileID) == Peer.getPeerID() ) // avoids storing chunks
+				|| Peer.getChunkPeerInit(fileID) == Peer.getPeerID() || Peer.calculateUsedSpace()+chunk.length > Peer.getMaximumCapacity()) // avoids storing chunks
 			return false;
 		else {
 			int currentID = Peer.getPeerID();
@@ -86,7 +86,7 @@ public class ThreadMDB extends MulticastThread {
 		
 
 		if (header[2].equals(Integer.toString(Peer.getPeerID())) || Peer.getReclaimedChunks().contains(new Pair<String, Integer> (fileID, chunkNo))
-				|| Peer.getChunkPeerInit(fileID) == Peer.getPeerID() ) { // avoids storing chunks
+				|| Peer.getChunkPeerInit(fileID) == Peer.getPeerID() || Peer.calculateUsedSpace()+chunk.length > Peer.getMaximumCapacity()) { // avoids storing chunks
 			System.out.println("Ignoring owned chunk");
 			return false;
 		} else {

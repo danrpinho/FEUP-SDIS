@@ -254,7 +254,11 @@ public class Peer implements RMIInterface{
 			fileStores.put(fileID, record);
 		}
 	}
-
+	
+	public static int getMaximumCapacity() {
+		return maximumCapacity;
+	}
+	
 	/**
 	 * @return the peerID
 	 */

@@ -13,11 +13,11 @@ public class ClientCommands {
 	public static final int RECLAIM_NoArgs = 3;
 	public static final int STATE_NoArgs = 2;
 	
-	public static final String BACKUP_Usage = "java TestApp <peer_ap> BACKUP <File_Path> <Replication_Degree>"; 
-	public static final String RESTORE_Usage = "java TestApp <peer_ap> RESTORE <File_Path>"; 
-	public static final String DELETE_Usage = "java TestApp <peer_ap> DELETE <File_Path>"; 
-	public static final String RECLAIM_Usage = "java TestApp <peer_ap> RECLAIM <space>"; 
-	public static final String STATE_Usage = "java TestApp <peer_ap> STATE";
+	public static final String BACKUP_Usage = "java Client <peer_ap> BACKUP <File_Path> <Replication_Degree>"; 
+	public static final String RESTORE_Usage = "java Client <peer_ap> RESTORE <File_Path>"; 
+	public static final String DELETE_Usage = "java Client <peer_ap> DELETE <File_Path>"; 
+	public static final String RECLAIM_Usage = "java Client <peer_ap> RECLAIM <space>"; 
+	public static final String STATE_Usage = "java Client <peer_ap> STATE";
 
 	public static void printUsage() {
 		System.out.println(BACKUP_Usage);
