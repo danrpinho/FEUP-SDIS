@@ -17,7 +17,6 @@ public class BackupChunk implements Runnable {
 	private String fileID = null;
 	private byte[] content = null;
 	private int currentChunk;
-	// private final int chunkSize = 64000;
 	private int replicationDeg;
 	private MulticastSocket mdbSocket = null;
 
