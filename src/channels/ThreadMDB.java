@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
+import java.util.Arrays;
 
 import peer.Message;
 import peer.Peer;
@@ -29,7 +30,7 @@ public class ThreadMDB extends MulticastThread {
 				DatagramPacket packet = receivePacket(64512);
 				System.out.print("Thread MDB Packet received: ");
 				System.out.println(new String(packet.getData()));
-				String firstWord = getFirstWord(new String(packet.getData(), "UTF-8"));
+				String firstWord = getFirstWord(new String(packet.getData(), "ISO-8859-1"));
 				if (firstWord.equals("PUTCHUNK")) {
 					store(packet);
 				} else {
@@ -42,7 +43,8 @@ public class ThreadMDB extends MulticastThread {
 	}
 
 	public boolean store(DatagramPacket packet) throws IOException, InterruptedException {
-		String[] packetData = new String(packet.getData(), "UTF-8").split(Message.endHeader);
+		byte[] data = Arrays.copyOfRange(packet.getData(), 0, packet.getLength());
+		String[] packetData = new String(data, "ISO-8859-1").split(Message.endHeader);
 		byte[] chunk = packetData[1].getBytes();
 		String[] header = packetData[0].split(" ");
 		packetData = null;
