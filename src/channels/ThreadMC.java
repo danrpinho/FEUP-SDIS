@@ -113,6 +113,7 @@ public class ThreadMC extends MulticastThread {
 		String[] arguments = Message.splitMessage((new String(packet.getData())));
 		String fileID = arguments[3];
 		Integer senderID = Integer.parseInt(arguments[2]);
+		
 		if(senderID != Peer.getPeerID())
 			Peer.deleteFile(fileID);
 	}

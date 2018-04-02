@@ -12,6 +12,7 @@ import java.net.UnknownHostException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
@@ -183,6 +184,16 @@ public class Peer implements RMIInterface{
 	}
 	
 	public void delete(File file) {
+		String fileID;
+		try {
+			fileID = Message.getFileData(file);
+			Peer.deleteFile(fileID);
+			
+		} catch (NoSuchAlgorithmException  | IOException e) {
+			System.err.println("Delete exception: "+e.toString());
+			e.printStackTrace();
+		} 
+		
 		new Thread(new Delete(file)).start();
 	}
 	
@@ -333,6 +344,22 @@ public class Peer implements RMIInterface{
 			fileStores.get(fileID).peers.get(chunkNo).remove((Object) peerID);	
 		}
 	}
+	
+	public static void removeFileStoresFile(String fileID, Integer senderID) {		
+		if(fileStores.containsKey(fileID)) {
+			ChunkStoreRecord record = fileStores.get(fileID);
+			ConcurrentHashMap<Integer, ArrayList<Integer> > chunks = record.peers;
+			Iterator<Entry<Integer, ArrayList<Integer>>> chunksIt = chunks.entrySet().iterator();
+			while(chunksIt.hasNext()) {
+				Map.Entry<Integer, ArrayList<Integer>> pair = (Entry<Integer, ArrayList<Integer>>) chunksIt.next();
+				if(pair.getValue().contains(senderID))
+					pair.getValue().remove((Object) senderID);
+				
+			}	
+		}				
+	}
+	
+	
 	
 	public static boolean peerStoredChunk(String fileID, Integer chunkNo, Integer peerID) {
 		if (checkChunkPeers(fileID, chunkNo) <= 0) {
@@ -492,13 +519,14 @@ public class Peer implements RMIInterface{
 	}
 	
 	public static void deleteFile(String fileID) {
+		Peer.removeFileStoresFile(fileID, Peer.getPeerID());
 		if(chunksInPeer.containsKey(fileID)) {
 			ArrayList<Integer> chunks = chunksInPeer.get(fileID);
 			Iterator<Integer> itr =chunks.iterator();
 			while(itr.hasNext()) {
 				Integer i = itr.next();
-				System.out.println(i);
 				Peer.deleteChunk(fileID, i);
+				itr.remove();
 			}
 			if(chunks.isEmpty())
 				chunksInPeer.remove(fileID);
