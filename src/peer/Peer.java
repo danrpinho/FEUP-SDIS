@@ -56,6 +56,7 @@ public class Peer implements RMIInterface{
 	private static final int chunkSize = 64000;	
 	private static ConcurrentHashMap<String, ChunkStoreRecord> fileStores = new ConcurrentHashMap<String, ChunkStoreRecord>();	
 	private static Vector<Pair<String, Integer> > putchunksReceived = new Vector<Pair<String, Integer> >();
+	private static Vector<Pair<String, Integer> > reclaimedChunks = new Vector<Pair<String, Integer> >();
 
 	public static Peer getInstance() {
 		if (instance == null) {
@@ -184,6 +185,7 @@ public class Peer implements RMIInterface{
 	
 	public void reclaim(int space) {
 		Vector<Pair<String, Integer> >filesDeleted = Peer.reclaimSpace(space);
+		reclaimedChunks.addAll(filesDeleted);
 		new Thread(new Reclaim(filesDeleted)).start();
 		
 	}
@@ -212,6 +214,10 @@ public class Peer implements RMIInterface{
 	
 	public static int getChunkSize() {
 		return chunkSize;
+	}
+	
+	public static Vector<Pair<String, Integer>> getReclaimedChunks() {
+		return reclaimedChunks;
 	}
 	
 	public static Vector<Pair<String, Integer> > getPutchunksReceived(){
@@ -593,6 +599,8 @@ public class Peer implements RMIInterface{
 		
 		return eliminatedFiles;
 	}
+
+	
 	
 	
 	
