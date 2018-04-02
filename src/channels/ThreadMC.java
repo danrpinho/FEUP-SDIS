@@ -28,7 +28,7 @@ public class ThreadMC extends MulticastThread {
 			try {
 				DatagramPacket packet = receivePacket(512);		
 				System.out.print("Thread MC Packet received: ");
-				System.out.println(new String(packet.getData()));
+				//System.out.println(new String(packet.getData()));
 				String data = new String(packet.getData(), "ISO-8859-1");
 				String firstWord = Utils.getFirstWord(data);
 				switch(firstWord) {
@@ -63,9 +63,10 @@ public class ThreadMC extends MulticastThread {
 		if(Peer.peerStoredChunk(arguments[3], chunkNo, peerID)) {
 			System.out.println("Getting chunk");
 			String filename = peerID + "-" + arguments[3] + "." + chunkNo.toString() + ".chunk";
-			FileInputStream fs = new FileInputStream(filename);
+			File fileIn = new File(filename);
+			FileInputStream fs = new FileInputStream(fileIn);
 			byte[] header = Message.createChunkHeader(arguments[1], peerID.toString(), arguments[3], chunkNo);
-			byte[] data = new byte[64000];
+			byte[] data = new byte[(int) fileIn.length()];
 			fs.read(data);
 			fs.close();
 			

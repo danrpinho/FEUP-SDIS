@@ -28,7 +28,7 @@ public class ThreadMDB extends MulticastThread {
 			try {
 				DatagramPacket packet = receivePacket(64512);
 				System.out.print("Thread MDB Packet received: ");
-				System.out.println(new String(packet.getData()));
+				//System.out.println(new String(packet.getData()));
 				String firstWord = getFirstWord(new String(packet.getData(), "ISO-8859-1"));
 				if (firstWord.equals("PUTCHUNK")) {
 					store(packet);
@@ -43,7 +43,7 @@ public class ThreadMDB extends MulticastThread {
 
 	public boolean store(DatagramPacket packet) throws IOException, InterruptedException {
 		byte[] data = Arrays.copyOfRange(packet.getData(), 0, packet.getLength());
-		String[] packetData = new String(data, "ISO-8859-1").split(Message.endHeader);
+		String[] packetData = new String(data, "ISO-8859-1").split(Message.endHeader, 2);
 		byte[] chunk = packetData[1].getBytes();
 		String[] header = packetData[0].split(" ");
 		packetData = null;

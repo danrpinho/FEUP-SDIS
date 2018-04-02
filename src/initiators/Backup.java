@@ -66,11 +66,13 @@ public class Backup implements Runnable {
 
 			// reading from file this.chunkSize bytes at a time
 			for (int currentChunk = 0; currentChunk < this.chunkCount; currentChunk++) {
+				System.out.println("Chunk size for chunk #" + currentChunk + ": " + currentChunkSize);
 				if (currentChunk == this.chunkCount - 1) {
 					currentChunkSize = this.lastChunkSize;
 				}
 
 				byte[] content = new byte[(int) currentChunkSize];
+				System.out.println("Content size: " + content.length);
 				System.arraycopy(fileContent, currentChunk * Peer.getChunkSize(), content, 0, (int) currentChunkSize);
 				(new Thread(new BackupChunk(fileID, content, currentChunk, replicationDeg))).start();
 
