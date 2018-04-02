@@ -1,14 +1,23 @@
 package peer;
 
-import java.io.*;
-import java.net.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.ReentrantLock;
 
 import channels.ThreadMC;
 import channels.ThreadMDB;
@@ -17,15 +26,10 @@ import initiators.Backup;
 import initiators.Delete;
 import initiators.Reclaim;
 import initiators.Restore;
-//import javafx.util.Pair;
-import rmi.RMIInterface;
-import utils.Utils;
-import utils.Pair;
 
-import java.rmi.registry.Registry;
-import java.rmi.registry.LocateRegistry;
-import java.rmi.RemoteException;
-import java.rmi.server.UnicastRemoteObject;
+import rmi.RMIInterface;
+import utils.Pair;
+import utils.Utils;
 
 
 public class Peer implements RMIInterface{
@@ -166,7 +170,7 @@ public class Peer implements RMIInterface{
 	public void restore(File file) {
 		System.out.println("Restore function called");
 		try {
-			new Thread(new Restore()).start();
+			new Thread(new Restore(file)).start();
 		}
 		catch(Exception e) {
 			System.err.println("Restore exception: "+e.toString());

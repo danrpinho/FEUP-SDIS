@@ -1,18 +1,13 @@
 package channels;
 
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-
-import java.net.InetAddress;
-
 import java.io.UnsupportedEncodingException;
 import java.net.DatagramPacket;
+import java.net.InetAddress;
 
 import peer.Message;
 import peer.Peer;
-import peer.RestoreStatus;
-import utils.Utils;
 
 
 public class ThreadMDR extends MulticastThread {
@@ -26,6 +21,8 @@ public class ThreadMDR extends MulticastThread {
 		while(true) {
 			try {
 				DatagramPacket packet = receivePacket(64512);
+				System.out.print("Thread MDB Packet received: ");
+				System.out.println(new String(packet.getData()));
 				String firstWord = getFirstWord(new String(packet.getData(), "ISO-8859-1"));
 				if (firstWord.equals("CHUNK")) {
 					receive(packet);
@@ -39,8 +36,8 @@ public class ThreadMDR extends MulticastThread {
 	}	
 	
 	public boolean receive(DatagramPacket packet) throws UnsupportedEncodingException, IOException, InterruptedException {
-		Peer.getInstance().incrementMdrPacketsReceived();
-		if(Peer.getInstance().getCurrentRestore() == null)
+		Peer.incrementMdrPacketsReceived();
+		if(Peer.getCurrentRestore() == null)
 			return false;
 		
 		String[] packetData = new String(packet.getData(), "ISO-8859-1").split(Message.endHeader, 2);
@@ -48,19 +45,18 @@ public class ThreadMDR extends MulticastThread {
 		String[] header = packetData[0].split(" ");
 		packetData = null;
 		
-		if (header[2].equals(Integer.toString(Peer.getInstance().getPeerID()))) // avoids storing chunks
+		if (header[2].equals(Integer.toString(Peer.getPeerID()))) // avoids storing chunks
 			return false;
 		
-		int currentID = Peer.getInstance().getPeerID();
+		int currentID = Peer.getPeerID();
 		int chunkNo = Integer.parseInt(header[4]);
-		int replicationDeg = Integer.parseInt(header[5]);
 		
 		//checks target chunk
-		if (!(Peer.getInstance().getCurrentRestore().getFileID().equals(header[3]) && 
-				chunkNo == Peer.getInstance().getCurrentRestore().getChunkNo()))
+		if (!(Peer.getCurrentRestore().getFileID().equals(header[3]) && 
+				chunkNo == Peer.getCurrentRestore().getChunkNo()))
 			return false;
 		
-		Peer.getInstance().getCurrentRestore().setReceived(true);
+		Peer.getCurrentRestore().setReceived(true);
 		
 //		// checks if peer had already stored target chunk
 //		if (Peer.peerStoredChunk(header[3], chunkNo, currentID)) {

@@ -3,24 +3,18 @@ package channels;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
-import java.net.SocketTimeoutException;
-import java.util.ArrayList;
-import java.util.concurrent.ConcurrentHashMap;
-
-import peer.ChunkStoreRecord;
-import peer.Message;
-import peer.Peer;
-import utils.Utils;
 
 import initiators.BackupChunk;
+import peer.Message;
+import peer.Peer;
 //import javafx.util.Pair;
 import utils.Pair;
+import utils.Utils;
 
 public class ThreadMC extends MulticastThread {
 
@@ -65,13 +59,15 @@ public class ThreadMC extends MulticastThread {
 		Integer chunkNo = Integer.parseInt(arguments[4]);
 		Integer senderID = Integer.parseInt(arguments[2]);
 		Integer peerID = Peer.getPeerID();
-		
+
 		if(Peer.peerStoredChunk(arguments[3], chunkNo, peerID)) {
+			System.out.println("Getting chunk");
 			String filename = peerID + "-" + arguments[3] + "." + chunkNo.toString() + ".chunk";
 			FileInputStream fs = new FileInputStream(filename);
 			byte[] header = Message.createChunkHeader(arguments[1], peerID.toString(), arguments[3], chunkNo);
 			byte[] data = new byte[64000];
 			fs.read(data);
+			fs.close();
 			
 			ByteArrayOutputStream outputStream = new ByteArrayOutputStream(header.length + data.length);
 			outputStream.write(header);
@@ -82,11 +78,12 @@ public class ThreadMC extends MulticastThread {
 			DatagramPacket chunk = new DatagramPacket(message, message.length, Peer.getMDRAddress(), Peer.getMDRPort());	
 			MulticastSocket socket = new MulticastSocket();
 			Peer.setMdrPacketsReceived(0);
-			long timeout = Utils.generateRandomInteger(0, 400);	
-			// TODO isto pode parar o thread, se calhar e melhor criarmos uma thread nova para esta funcao
+			long timeout = Utils.generateRandomInteger(0, 400);
 			Thread.sleep(timeout);
-			if (Peer.getMdrPacketsReceived() == 0)
+			if (Peer.getMdrPacketsReceived() == 0) {
 				socket.send(chunk);
+			}
+			socket.close();
 		}		
 	}
 
