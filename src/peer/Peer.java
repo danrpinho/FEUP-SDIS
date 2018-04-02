@@ -15,6 +15,7 @@ import channels.ThreadMDB;
 import channels.ThreadMDR;
 import initiators.Backup;
 import initiators.Delete;
+import initiators.Reclaim;
 import initiators.Restore;
 import javafx.util.Pair;
 import rmi.RMIInterface;
@@ -178,6 +179,7 @@ public class Peer implements RMIInterface{
 	
 	public void reclaim(int space) {
 		Vector<Pair<String, Integer> >filesDeleted = Peer.reclaimSpace(space);
+		new Thread(new Reclaim(filesDeleted)).start();
 		
 	}
 	
@@ -311,7 +313,12 @@ public class Peer implements RMIInterface{
 	public static void incrementMdrPacketsReceived() {
 		Peer.mdrPacketsReceived++;
 	}
-
+	
+	public static void removeFileStoresPeer(String fileID, Integer chunkNo, Integer peerID) {
+		if(fileStores.containsKey(fileID) && fileStores.get(fileID).peers.contains(chunkNo))
+			fileStores.get(fileID).peers.get(chunkNo).remove((Object) peerID);	
+	}
+	
 	public static boolean peerStoredChunk(String fileID, Integer chunkNo, Integer peerID) {
 		if (checkChunkPeers(fileID, chunkNo) <= 0) {
 			return false;

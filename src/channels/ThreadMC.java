@@ -136,9 +136,12 @@ public class ThreadMC extends MulticastThread {
 		Integer senderID = Integer.parseInt(arguments[2]);
 		Integer chunkNo = Integer.parseInt(arguments[4]);
 		
-		Peer.getFileStores().get(fileID).peers.get(chunkNo).remove((Object) senderID);
 		
-		if(Peer.getChunksInPeer().containsKey(fileID) && Peer.getChunksInPeer().get(fileID).contains(chunkNo)) {
+		Peer.removeFileStoresPeer(fileID, chunkNo, senderID);
+			
+		if(Peer.getChunksInPeer().containsKey(fileID) && Peer.getChunksInPeer().get(fileID).contains(chunkNo) && 
+				Peer.getChunksInPeer().containsKey(fileID) && Peer.getChunksInPeer().get(fileID).contains(chunkNo) && 
+				Peer.getFileStores().get(fileID).peers.get(chunkNo).size() < Peer.getFileStores().get(fileID).getReplicationDeg()) {		
 			File file= new File(((Integer) Peer.getPeerID()).toString() + "-"+ fileID+"."+chunkNo.toString()+".chunk");
 			FileInputStream stream = null;
 			byte [] content = new byte[Peer.getChunkSize()];
@@ -153,7 +156,7 @@ public class ThreadMC extends MulticastThread {
 				e.printStackTrace();
 			}
 			
-			if(Peer.getPutchunksReceived().contains(new Pair<String, Integer>(fileID, chunkNo))) {
+			if(! Peer.getPutchunksReceived().contains(new Pair<String, Integer>(fileID, chunkNo))) {
 				(new Thread(new BackupChunk(fileID, content, chunkNo, 1))).start();
 				Peer.getPutchunksReceived().remove(new Pair<String, Integer>(fileID, chunkNo));
 			}

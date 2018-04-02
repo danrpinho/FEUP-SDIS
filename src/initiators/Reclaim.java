@@ -13,16 +13,16 @@ import peer.Peer;
 
 public class Reclaim implements Runnable{
 	
-	private String fileID;
+	
 	private Vector<Pair <String, Integer>> filesDeleted;
 	private MulticastSocket mcSocket;
 	
-	public Reclaim(File file, Vector<Pair <String, Integer>> filesDeleted) {
+	public Reclaim(Vector<Pair <String, Integer>> filesDeleted) {
 		this.filesDeleted = filesDeleted;
 		try {
-			this.fileID = Message.getFileData(file);
+
 			mcSocket = new MulticastSocket();
-		} catch (NoSuchAlgorithmException | IOException e) {
+		} catch (IOException e) {
 			System.err.println("Error in Reclaims Constructor: "+e.toString());
 			e.printStackTrace();
 		}
@@ -31,16 +31,21 @@ public class Reclaim implements Runnable{
 	@Override
 	public void run() {
 		for(int i=0; i < filesDeleted.size(); i++) {
-			byte[] message = Message.createRemovedHeader(Peer.getVersion(), ((Integer) Peer.getPeerID()).toString(), filesDeleted.elementAt(i).getKey(), filesDeleted.elementAt(i).getValue());
-			DatagramPacket packet = new DatagramPacket(message, message.length, Peer.getMCAddress(), Peer.getMCPort());
-			try {
-				mcSocket.send(packet);
-			} catch (IOException e) {
-				System.err.println("Error in Delete Constructor: "+e.toString());
-				e.printStackTrace();
-			}
-		}
+			String fileID = filesDeleted.elementAt(i).getKey();
+			Integer chunkNo = filesDeleted.elementAt(i).getValue();
+			//if(!Peer.getFileStores().containsKey(fileID) || !Peer.getFileStores().get(fileID).peers.containsKey(chunkNo) || Peer.getFileStores().get(fileID).peers.get(chunkNo).size() < Peer.getFileStores().get(fileID).getReplicationDeg()) {
+				System.out.println("Will send Removed Message");
+				byte[] message = Message.createRemovedHeader(Peer.getVersion(), ((Integer) Peer.getPeerID()).toString(), fileID, chunkNo);
+				DatagramPacket packet = new DatagramPacket(message, message.length, Peer.getMCAddress(), Peer.getMCPort());
+				try {
+					mcSocket.send(packet);
+				} catch (IOException e) {
+					System.err.println("Error in Delete Constructor: "+e.toString());
+					e.printStackTrace();
+				}
+			//}
 		
+		}
 	}
 	
 	
