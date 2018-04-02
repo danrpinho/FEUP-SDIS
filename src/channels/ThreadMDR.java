@@ -46,7 +46,7 @@ public class ThreadMDR extends MulticastThread {
 		byte[] data = Arrays.copyOfRange(packet.getData(), 0, packet.getLength());
 		String[] packetData = new String(data, "ISO-8859-1").split(Message.endHeader, 2);
 		System.out.println("data length = " + data.length);
-		byte[] chunk = packetData[1].getBytes();
+		byte[] chunk = packetData[1].getBytes("ISO-8859-1");
 		String[] header = packetData[0].split(" ");
 		packetData = null;
 		

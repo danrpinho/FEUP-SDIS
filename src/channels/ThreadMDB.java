@@ -42,11 +42,15 @@ public class ThreadMDB extends MulticastThread {
 	}
 
 	public boolean store(DatagramPacket packet) throws IOException, InterruptedException {
+		System.out.println("Packet length: " + packet.getLength());
 		byte[] data = Arrays.copyOfRange(packet.getData(), 0, packet.getLength());
 		String[] packetData = new String(data, "ISO-8859-1").split(Message.endHeader, 2);
-		byte[] chunk = packetData[1].getBytes();
+		byte[] chunk = packetData[1].getBytes("ISO-8859-1");
 		String[] header = packetData[0].split(" ");
 		packetData = null;
+		
+		System.out.println("Chunk length: " + chunk.length);
+
 		if (header[2].equals(Integer.toString(Peer.getPeerID()))) // avoids storing chunks
 			return false;
 		

@@ -66,10 +66,10 @@ public class Backup implements Runnable {
 
 			// reading from file this.chunkSize bytes at a time
 			for (int currentChunk = 0; currentChunk < this.chunkCount; currentChunk++) {
-				System.out.println("Chunk size for chunk #" + currentChunk + ": " + currentChunkSize);
 				if (currentChunk == this.chunkCount - 1) {
 					currentChunkSize = this.lastChunkSize;
 				}
+				System.out.println("Chunk size for chunk #" + currentChunk + ": " + currentChunkSize);
 
 				byte[] content = new byte[(int) currentChunkSize];
 				System.out.println("Content size: " + content.length);
