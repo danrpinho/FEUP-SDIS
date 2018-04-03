@@ -67,7 +67,7 @@ public final class Utils {
 	}
 	
 		
-	public static void printHashMap(ConcurrentHashMap<String, ChunkStoreRecord> hash) {
+	/*public static void printHashMap(ConcurrentHashMap<String, ChunkStoreRecord> hash) {
 		System.out.println("Print HashMap FileStores: ");
 		for (String name: hash.keySet()){
 
@@ -118,7 +118,7 @@ public final class Utils {
 			System.out.print(vec.elementAt(i).getKey());System.out.println(" ");System.out.println(vec.elementAt(i).getValue());
 		}
 		
-	}
+	}*/
 	
 	
 

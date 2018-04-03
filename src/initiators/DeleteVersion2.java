@@ -33,7 +33,7 @@ public class DeleteVersion2 implements Runnable {
 	
 	@Override
 	public void run() {
-		System.out.println("Delete version 2 is running");
+		
 		long timeout = Utils.generateRandomInteger(0, 5000);
 		try {
 			Thread.sleep(timeout);

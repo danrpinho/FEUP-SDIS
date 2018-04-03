@@ -101,7 +101,6 @@ public class Peer implements RMIInterface{
 		readChunksInPeer();
 		readFileStores();
 		readPeersToBeDeleted();
-		Utils.printChunksInPeer(peersToBeDeleted);
 		launchThreads();
 		
 		
@@ -193,10 +192,10 @@ public class Peer implements RMIInterface{
 		try {
 			fileID = Message.getFileData(file);
 			Peer.deleteFile(fileID);
-			System.out.println("b1");
+			
 			if(version.equals("2")) {
 				Peer.addPeersToBeDeleted(fileID);
-				System.out.println("b2");
+				
 			}
 			
 		} catch (NoSuchAlgorithmException  | IOException e) {
@@ -723,9 +722,7 @@ public class Peer implements RMIInterface{
 			arr.addAll(pair.getValue());
 			arr = (ArrayList<Integer>) arr.stream().distinct().collect(Collectors.toList());
 		}
-		System.out.println("PeersToDelete: ");
-		for(Integer i : arr)
-			System.out.println(arr);
+		
 		}
 		
 		if(peersToBeDeleted.containsKey(fileID)) {
@@ -736,7 +733,7 @@ public class Peer implements RMIInterface{
 		}
 		
 		peersToBeDeleted.put(fileID, arr);
-		Utils.printChunksInPeer(peersToBeDeleted);
+		
 		
 		
 	}
