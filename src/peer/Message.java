@@ -20,7 +20,7 @@ public final class Message {
 	private Message() {}
 	
 	public enum MessageType {
-		PUTCHUNK, STORED, GETCHUNK, CHUNK, DELETE, REMOVED
+		PUTCHUNK, STORED, GETCHUNK, CHUNK, DELETE, REMOVED, CONFIRMDELETE
 	};
 	
 	/**
@@ -76,6 +76,11 @@ public final class Message {
 	
 	public static byte[] createRemovedHeader(String version, String peerID, String fileID, int chunkNo) {
 		byte[] res = createHeader(MessageType.REMOVED, version, peerID, fileID, chunkNo, -1);
+		return res;
+	}
+	
+	public static byte[] createConfirmeddeleteHeader(String version, String peerID, String fileID) {
+		byte[] res = createHeader(MessageType.CONFIRMDELETE, version, peerID, fileID, -1, -1);
 		return res;
 	}
 	

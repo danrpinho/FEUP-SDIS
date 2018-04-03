@@ -47,6 +47,11 @@ public class ThreadMC extends MulticastThread {
 					case "REMOVED":
 						processRemoved(packet);
 						break;
+					case "CONFIRMDELETE":
+						if(Peer.getVersion().equals("2"))
+							processConfirmdelete(packet);
+						break;
+						
 					default:
 						throw new IOException("Invalid packet header!");
 				}
@@ -89,6 +94,7 @@ public class ThreadMC extends MulticastThread {
 			
 			DatagramPacket chunk = new DatagramPacket(message, message.length, Peer.getMDRAddress(), Peer.getMDRPort());	
 			MulticastSocket socket = new MulticastSocket();
+			socket.setTimeToLive(1);
 			Peer.setMdrPacketsReceived(0);
 			long timeout = Utils.generateRandomInteger(0, 400);
 			Thread.sleep(timeout);
@@ -99,13 +105,26 @@ public class ThreadMC extends MulticastThread {
 		}		
 	}
 	
-	private void processDelete(DatagramPacket packet) {
+	private void processDelete(DatagramPacket packet)  {
 		String[] arguments = Message.splitMessage((new String(packet.getData())));
 		String fileID = arguments[3];
 		Integer senderID = Integer.parseInt(arguments[2]);
 		
 		if(senderID != Peer.getPeerID())
-			Peer.deleteFile(fileID);
+			if(Peer.deleteFile(fileID) && Peer.getVersion().equals("2")) {
+				byte [] header = Message.createConfirmeddeleteHeader(Peer.getVersion(), ((Integer) Peer.getPeerID()).toString(), fileID);
+				try {
+					MulticastSocket socket = new MulticastSocket();
+					socket.setTimeToLive(1);
+					DatagramPacket confDelete = new DatagramPacket(header, header.length, Peer.getMCAddress(), Peer.getMCPort());
+					socket.send(confDelete);
+					socket.close();
+				} catch (IOException e) {
+					System.err.println("Exception in processing Delete");
+					e.printStackTrace();
+				}
+			}
+		
 	}
 	
 	private void processRemoved(DatagramPacket packet) {
@@ -146,6 +165,14 @@ public class ThreadMC extends MulticastThread {
 			}
 			
 		}
+	}
+	
+	private void processConfirmdelete(DatagramPacket packet) {
+		String[] arguments = Message.splitMessage((new String(packet.getData())));
+		String fileID = arguments[3];
+		Integer senderID = Integer.parseInt(arguments[2]);
+		Peer.removePeersToBeDeleted(fileID, senderID);
+		
 	}
 
 	

@@ -8,6 +8,7 @@ public class FileHandler implements Runnable {
 		while(true) {
 		Peer.writeChunksInPeer();
 		Peer.writeFileStores();
+		Peer.writePeersToBeDeleted();
 		try {
 			Thread.sleep(5000);
 		} catch (InterruptedException e) {

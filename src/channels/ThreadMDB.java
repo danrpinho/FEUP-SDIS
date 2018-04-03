@@ -19,6 +19,7 @@ public class ThreadMDB extends MulticastThread {
 	public ThreadMDB(InetAddress address, int port) throws IOException {
 		super(address, port);
 		mcSocket = new MulticastSocket();
+		mcSocket.setTimeToLive(1);
 	}
 
 	@Override

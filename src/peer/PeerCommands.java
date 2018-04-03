@@ -4,6 +4,7 @@ public class PeerCommands {
 	public static final int PEER_NoArgs = 9;
 	public static final String ChunksInPeerPathName = "chunksInPeer.data";
 	public static final String FileStoresPathName = "fileStores.data";
+	public static final String PeersToBeDeletedPathName = "peersToBeDeleted.data";
 	
 	public static void printUsage() {
 		System.out.println(

@@ -19,12 +19,14 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 import channels.ThreadMC;
 import channels.ThreadMDB;
 import channels.ThreadMDR;
 import initiators.Backup;
 import initiators.Delete;
+import initiators.DeleteVersion2;
 import initiators.Reclaim;
 import initiators.Restore;
 
@@ -52,11 +54,14 @@ public class Peer implements RMIInterface{
 	private static ConcurrentHashMap<String, ArrayList<Integer>> chunksInPeer = new ConcurrentHashMap<String, ArrayList<Integer> >();
 	private static String chunksInPeerFilename = null;
 	private static String fileStoresFilename = null;
+	private static String peersToBeDeletedFilename = null;
 	private static RestoreStatus currentRestore = null;
 	private static int mdrPacketsReceived = 0;	
-	private static ConcurrentHashMap<String, ChunkStoreRecord> fileStores = new ConcurrentHashMap<String, ChunkStoreRecord>();	
+	private static ConcurrentHashMap<String, ChunkStoreRecord> fileStores = new ConcurrentHashMap<String, ChunkStoreRecord>();
+	private static ConcurrentHashMap<String, ArrayList<Integer> > peersToBeDeleted = new ConcurrentHashMap<String, ArrayList<Integer>>();
 	private static Vector<Pair<String, Integer> > putchunksReceived = new Vector<Pair<String, Integer> >();
 	private static Vector<Pair<String, Integer> > reclaimedChunks = new Vector<Pair<String, Integer> >();
+	private static DeleteVersion2 deleteVersion2;
 	
 	private static final int chunkSize = 64000;	
 	private static final int maximumCapacity = 10000000;
@@ -82,6 +87,7 @@ public class Peer implements RMIInterface{
 		
 		chunksInPeerFilename = ((Integer) peerID).toString()+"-"+PeerCommands.ChunksInPeerPathName;
 		fileStoresFilename = ((Integer) peerID).toString()+"-"+PeerCommands.FileStoresPathName;
+		peersToBeDeletedFilename = ((Integer) peerID).toString()+"-"+PeerCommands.PeersToBeDeletedPathName;
 		
 		if(initRMI(accessPoint) == false) 
 			return;
@@ -89,11 +95,13 @@ public class Peer implements RMIInterface{
 		MCThread = new ThreadMC(mcAddress, mcPort);
 		MDBThread = new ThreadMDB(mdbAddress, mdbPort);
 		MDRThread = new ThreadMDR(mdrAddress, mdrPort);
-
 		fileHandler = new FileHandler();
+		deleteVersion2 = new DeleteVersion2();
 		
 		readChunksInPeer();
 		readFileStores();
+		readPeersToBeDeleted();
+		Utils.printChunksInPeer(peersToBeDeleted);
 		launchThreads();
 		
 		
@@ -185,6 +193,11 @@ public class Peer implements RMIInterface{
 		try {
 			fileID = Message.getFileData(file);
 			Peer.deleteFile(fileID);
+			System.out.println("b1");
+			if(version.equals("2")) {
+				Peer.addPeersToBeDeleted(fileID);
+				System.out.println("b2");
+			}
 			
 		} catch (NoSuchAlgorithmException  | IOException e) {
 			System.err.println("Delete exception: "+e.toString());
@@ -212,6 +225,8 @@ public class Peer implements RMIInterface{
 		(new Thread(MDRThread)).start();
 		(new Thread(MDBThread)).start();
 		(new Thread(fileHandler)).start();
+		if(Peer.getVersion().equals("2"))
+			(new Thread(deleteVersion2)).start();
 	}
 
 	private static void closeThreads() throws IOException {
@@ -465,6 +480,29 @@ public class Peer implements RMIInterface{
 			
 	}
 	
+	public static void readPeersToBeDeleted() {
+		try {
+			if((Utils.validFilePath(peersToBeDeletedFilename)) == null) {
+				FileOutputStream out = new FileOutputStream(peersToBeDeletedFilename);
+				ObjectOutputStream oos = new ObjectOutputStream(out);
+				oos.writeObject(peersToBeDeleted);
+				oos.close();
+				
+			}
+			else {
+				FileInputStream in = new FileInputStream(peersToBeDeletedFilename);
+				ObjectInputStream ob = new ObjectInputStream(in);
+				peersToBeDeleted = (ConcurrentHashMap<String, ArrayList<Integer>>) ob.readObject();
+				ob.close();
+			}
+			//Utils.printHashMap(fileStores);
+			}
+			catch(Exception e) {
+				System.err.println("Error reading peersToBeDeleted file: "+e.toString());
+				e.printStackTrace();
+			}
+	}
+	
 	public static void writeChunksInPeer() {
 		FileOutputStream fos;
 		try {
@@ -502,6 +540,24 @@ public class Peer implements RMIInterface{
 	
 	}
 	
+	public static void writePeersToBeDeleted() {
+		FileOutputStream fos;
+		try {
+			fos = new FileOutputStream(peersToBeDeletedFilename);
+			ObjectOutputStream oos = new ObjectOutputStream(fos);
+			oos.writeObject(peersToBeDeleted);
+			oos.close();
+		} catch (FileNotFoundException e) {
+			System.err.println("Error writing peersToBeDeleted file: "+e.toString());
+			e.printStackTrace();
+		}
+		catch (IOException e) {
+			System.err.println("Error writing peersToBeDeleted file: "+e.toString());
+			e.printStackTrace();
+		}
+	
+	}
+	
 	public static void addToChunksInPeer(String fileID,  int chunk) {
 		if(chunksInPeer.containsKey(fileID)) {
 			ArrayList<Integer> chunks = chunksInPeer.get(fileID);
@@ -519,7 +575,7 @@ public class Peer implements RMIInterface{
 		
 	}
 	
-	public static void deleteFile(String fileID) {
+	public static boolean deleteFile(String fileID) {
 		Peer.removeFileStoresFile(fileID, Peer.getPeerID());
 		if(chunksInPeer.containsKey(fileID)) {
 			ArrayList<Integer> chunks = chunksInPeer.get(fileID);
@@ -531,9 +587,13 @@ public class Peer implements RMIInterface{
 			}
 			if(chunks.isEmpty())
 				chunksInPeer.remove(fileID);
+			
+			Peer.writeChunksInPeer();
+			return true;
 		}
+		else
+			return false;
 		
-		Peer.writeChunksInPeer();
 	
 	}
 	
@@ -652,6 +712,45 @@ public class Peer implements RMIInterface{
 		return (int) file.length();
 	}
 	
+	public static void addPeersToBeDeleted(String fileID){
+		ArrayList<Integer> arr = new ArrayList<Integer>();
+		if(fileStores.containsKey(fileID)) {
+		ConcurrentHashMap<Integer, ArrayList<Integer> > chunks = fileStores.get(fileID).peers;
+		Iterator<Entry<Integer, ArrayList<Integer>>> chunksIt = chunks.entrySet().iterator();
+		
+		while(chunksIt.hasNext()) {
+			Map.Entry<Integer, ArrayList<Integer>> pair= (Entry<Integer, ArrayList<Integer>>) chunksIt.next();
+			arr.addAll(pair.getValue());
+			arr = (ArrayList<Integer>) arr.stream().distinct().collect(Collectors.toList());
+		}
+		System.out.println("PeersToDelete: ");
+		for(Integer i : arr)
+			System.out.println(arr);
+		}
+		
+		if(peersToBeDeleted.containsKey(fileID)) {
+			ArrayList<Integer> finalPeers =  peersToBeDeleted.get(fileID);
+			finalPeers.addAll(arr);
+			finalPeers = (ArrayList<Integer>) finalPeers.stream().distinct().collect(Collectors.toList());
+			peersToBeDeleted.put(fileID, finalPeers);
+		}
+		
+		peersToBeDeleted.put(fileID, arr);
+		Utils.printChunksInPeer(peersToBeDeleted);
+		
+		
+	}
+	
+	public static void removePeersToBeDeleted(String fileID, Integer peerID) {
+		if(peersToBeDeleted.containsKey(fileID)) {
+			ArrayList<Integer> arr = peersToBeDeleted.get(fileID);
+			if(arr.contains(peerID)) 
+				arr.remove((Object) peerID);
+			peersToBeDeleted.put(fileID, arr);
+			
+		}
+	}
+	
 	public static void printStateInit() {
 		System.out.println("Files Initiated by this Peer:");
 		System.out.println("");
@@ -716,6 +815,12 @@ public class Peer implements RMIInterface{
 		printStateStored();
 		printPeerStorage();
 	}
+
+	public static ConcurrentHashMap<String, ArrayList<Integer> > getPeersToBeDeleted() {
+		return peersToBeDeleted;
+	}
+
+	
 
 	
 	

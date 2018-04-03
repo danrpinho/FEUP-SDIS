@@ -15,6 +15,7 @@ public abstract class MulticastThread implements Runnable {
 		this.address = address;
 		this.port = port;
 		this.socket = new MulticastSocket(this.port);
+		this.socket.setTimeToLive(1);
 		this.socket.joinGroup(this.address);
 	}
 	
